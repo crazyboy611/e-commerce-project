@@ -1,4 +1,6 @@
 spring:
+  server:
+    port: 8000
   output:
     ansi:
       enabled: always
@@ -7,10 +9,10 @@ spring:
     username: ${DBMS_USERNAME:docker_database}
     password: ${DBMS_PASSWORD:0011246}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  h2:
-    console:
-      enabled: true
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update
+    show-sql: true
+api:
+  prefix: "api/v1"
