@@ -1,0 +1,16 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/ecommerce}
+    username: ${DBMS_USERNAME:docker_database}
+    password: ${DBMS_PASSWORD:0011246}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
