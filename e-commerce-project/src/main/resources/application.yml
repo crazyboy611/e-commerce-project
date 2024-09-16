@@ -1,0 +1,18 @@
+spring:
+  server:
+    port: 8000
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/ecommerce}
+    username: ${DBMS_USERNAME:root}
+    password: ${DBMS_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+api:
+  prefix: "api/v1"
