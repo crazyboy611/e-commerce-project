@@ -6,8 +6,8 @@ spring:
       enabled: always
   datasource:
     url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/ecommerce}
-    username: ${DBMS_USERNAME:docker_database}
-    password: ${DBMS_PASSWORD:0011246}
+    username: ${DBMS_USERNAME:root}
+    password: ${DBMS_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
