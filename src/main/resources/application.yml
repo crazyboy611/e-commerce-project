@@ -11,7 +11,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -28,6 +28,18 @@ oauth2:
     client_secret: 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
     grant_type : authorization_code
     redirect_uri : http://localhost:3000
+payment:
+  vn_pay:
+    vnp_version: 2.1.0
+    vnp_command: pay
+    vnp_tmn_code: 4CD3KS17
+    vnp_hash_secret: 2SBCVR1J0RQLXXGLUTB4XQ3MGGPDQDXR
+    vnp_url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+    vnp_curr_code: VND
+    vnp_order_type: other
+    vnp_locale: vn
+    vnp_return_url: http://localhost:8080${api.prefix}/orders/checkout/vn-pay/callback
+
 api:
   prefix: "/api/v1"
 app:
