@@ -1,4 +1,15 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    username: jackloss611@gmail.com
+    password: kfojsjrzvrkthtln
+    port: 587
+    properties:
+      smtp:
+        auth: true
+        starttls :
+          enable : true
+          required : true
   server:
     port: 8080
   output:
@@ -39,12 +50,11 @@ payment:
     vnp_order_type: other
     vnp_locale: vn
     vnp_return_url: http://localhost:8080${api.prefix}/orders/checkout/vn-pay/callback
-
 api:
   prefix: "/api/v1"
 app:
   cors:
-    allowedOrigins: http://localhost:3000,http://localhost:8080
+    allowedOrigins: http://localhost:3000
 springdoc:
   swagger-ui:
     path: ${api.prefix}/swagger-ui.html
