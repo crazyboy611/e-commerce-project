@@ -1,4 +1,15 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    username: jackloss611@gmail.com
+    password: kfojsjrzvrkthtln
+    port: 587
+    properties:
+      smtp:
+        auth: true
+        starttls :
+          enable : true
+          required : true
   server:
     port: 8080
   output:
@@ -16,11 +27,34 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+rsa:
+  rsa-private-key: classpath:certs/private.pem
+  rsa-public-key: classpath:certs/public.pem
+jwt:
+  expiration_time: 3600
+  refresh_duration: 7200
+oauth2:
+  google:
+    client_id: 1039764256495-amola0auaqcdpidh0f03mbsncb7rjo51.apps.googleusercontent.com
+    client_secret: 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
+    grant_type : authorization_code
+    redirect_uri : http://localhost:3000
+payment:
+  vn_pay:
+    vnp_version: 2.1.0
+    vnp_command: pay
+    vnp_tmn_code: 4CD3KS17
+    vnp_hash_secret: 2SBCVR1J0RQLXXGLUTB4XQ3MGGPDQDXR
+    vnp_url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+    vnp_curr_code: VND
+    vnp_order_type: other
+    vnp_locale: vn
+    vnp_return_url: http://localhost:8080${api.prefix}/orders/checkout/vn-pay/callback
 api:
   prefix: "/api/v1"
 app:
   cors:
-    allowedOrigins: http://localhost:3000,http://localhost:8080
+    allowedOrigins: http://localhost:3000
 springdoc:
   swagger-ui:
     path: ${api.prefix}/swagger-ui.html
