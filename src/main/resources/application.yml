@@ -38,7 +38,18 @@ oauth2:
     client_id: 1039764256495-amola0auaqcdpidh0f03mbsncb7rjo51.apps.googleusercontent.com
     client_secret: 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
     grant_type : authorization_code
-    redirect_uri : http://localhost:3000
+    redirect_uri : http://localhost:3000/auth/google/callback
+  facebook:
+    client_id: 918584369605233
+    client_secret: 0acec4c4b70787693fe4d244e23e58bc
+    grant_type: code
+    redirect_uri: http://localhost:3000/auth/facebook/callback
+    auth_uri: https://www.facebook.com/v21.0/dialog/oauth
+    user-info-uri: https://graph.facebook.com/me?fields=id,name,email,picture.type(large)
+    scope:
+      - email
+      - public_profile
+
 payment:
   vn_pay:
     vnp_version: 2.1.0
