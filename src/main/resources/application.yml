@@ -60,7 +60,7 @@ payment:
     vnp_curr_code: VND
     vnp_order_type: other
     vnp_locale: vn
-    vnp_return_url: http://localhost:8080${api.prefix}/orders/checkout/vn-pay/callback
+    vnp_return_url: http://localhost:3000/orders/checkout/vn-pay/callback
 api:
   prefix: "/api/v1"
 app:
