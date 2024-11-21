@@ -251,7 +251,7 @@ export default {
                 receiver_full_name: sessionStorage.getItem('fullName'),
                 receiver_phone_number: this.isEmail ? this.receiverPhoneNumber : sessionStorage.getItem('emailOrPhone'),
                 status: 'pending',
-                shipping_method: this.selectedShipment.type,
+                shipment_id: this.selectedShipment.id,
                 shipping_address: this.addressUser,
                 shipping_date: this.selectedShipment.date,
                 // coupon_code: this.enteredCode || '',

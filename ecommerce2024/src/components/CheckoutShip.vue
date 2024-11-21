@@ -46,18 +46,21 @@ export default {
             selectedShipmentType: null, 
             shipments: [
                 {
+                    id:'1',
                     type: 'Free',
                     desc: 'Regular shipment',
                     date: this.getShipments(4),
                     price: 0,
                 },
                 {
+                    id: '2',
                     type: 'Standard',
                     desc: 'Express shipping',
                     date: this.getShipments(3),
                     price: 10,
                 },
                 {
+                    id:'3',
                     type: 'Premium',
                     desc: 'Priority shipping',
                     date: this.getShipments(2),
