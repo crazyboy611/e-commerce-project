@@ -1,0 +1,447 @@
+<template>
+    <div class="container">
+        <div class="header">
+            <h1>Manage Users</h1>
+        </div>
+        <div class="search">
+            <input type="text" v-model="searchQuery" placeholder="Search full name" class="form-control mb-3" />
+        </div>
+        <div class="card">
+            <table  v-if="filteredUsers.length">
+                <thead>
+                    <tr>
+                        <th>Stt</th>
+                        <th>Full Name</th>
+                        <th>Address</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th class="text-center">Report</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(user, index) in paginatedUsers" :key="user.id"
+                        :class="{ 'bg-danger': user.isReported }">
+                        <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+                        <td><a href="#" @click="showDetail(user)">{{ user.full_name }}</a></td>
+                        <td class="fw-bold">{{ user.address }}</td>
+                        <td>{{ maskPhone(user.phone_number) }}</td>
+                        <td class="fw-bold">{{ maskEmail(user.email) }}</td>
+                        <td class="text-center">
+                            <input type="checkbox" @click="reportUser(user)" v-model="user.isReported">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p v-else class="text-center">No matching users found.</p>
+            <!-- Pagination controls -->
+            <div class="pagination">
+                <button :disabled="currentPage === 1" @click="prevPage"><i
+                        class="fa-solid fa-chevron-left"></i></button>
+                <span>{{ currentPage }}/{{ totalPages }}</span>
+                <button :disabled="currentPage === totalPages" @click="nextPage"><i
+                        class="fa-solid fa-chevron-right"></i></button>
+            </div>
+
+        </div>
+
+        <!-- Modal for User Details -->
+        <div v-if="showModal" class="modal" @click.self="closeModal">
+            <div class="modal-content">
+                <span class="close" @click="closeModal">&times;</span>
+                <h2>User Details</h2>
+                <img :src="selectedUser.image" alt="User Image" width="150" />
+                <p><strong>Name:</strong> {{ selectedUser.full_name }}</p>
+                <p><strong>Address:</strong> {{ selectedUser.address }}</p>
+                <p><strong>Phone:</strong> {{ maskPhone(selectedUser.phone_number) }}</p>
+                <p><strong>Email:</strong> {{ maskEmail(selectedUser.email) }}</p>
+            </div>
+        </div>
+
+        <!-- Report Hours Modal -->
+        <div v-if="showReportModal" class="modal-report" @click.self="closeReportModal">
+            <div class="modal-report-content">
+                <span class="close" @click="closeReportModal">&times;</span>
+                <h2>Report User</h2>
+                <p>Enter hours to lock the user:</p>
+                <input type="number" v-model="reportHours" min="1" />
+                <button @click="confirmReport">Confirm</button>
+            </div>
+        </div>
+
+    </div>
+</template>
+
+<script>
+import axios from 'axios';
+export default {
+    name: 'ManagerUser',
+    data() {
+        return {
+            users: [],
+            showModal: false,
+            selectedUser: {},
+            currentPage: 1,
+            itemsPerPage: 5, // 5 items per page
+            searchQuery: '',
+            showReportModal: false,
+            reportHours: 0,
+        };
+    },
+    computed: {
+        filteredUsers() {
+            const query = this.searchQuery.toLowerCase();
+            return this.users.filter((user) => {
+                return user.full_name.toLowerCase().includes(query);
+            });
+        },
+        totalPages() {
+            return Math.ceil(this.filteredUsers.length / this.itemsPerPage);
+        },
+        paginatedUsers() {
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            return this.filteredUsers.slice(start, end);
+        },
+    },
+    mounted() {
+        this.fetchUser();
+    },
+    methods: {
+        async fetchUser() {
+            try {
+                const response = await axios.get('http://localhost:8080/api/v1/users?size=10&page=0', {
+                    headers: {
+                        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                        'Accept': '*/*'
+                    }
+                });
+                if (response.data.status === 200) {
+                    this.users = response.data.data.user_list;
+                } else {
+                    console.log(response.data.message);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        // maskPhone(phone) {
+        //     return `${phone.slice(0, 3)}****${phone.slice(-3)}`;
+        // },
+        // maskEmail(email) {
+        //     const [user, domain] = email.split('@');
+        //     return `${user.slice(0, 1)}****${user.slice(1)}@${domain}`;
+        // },
+        maskPhone(phone) {
+            if (!phone) return 'null'; // xử lý trường hợp null hoặc undefined
+            return `${phone.slice(0, 3)}****${phone.slice(-3)}`;
+        },
+        maskEmail(email) {
+            if (!email) return 'null'; // xử lý trường hợp null hoặc undefined
+            const [user, domain] = email.split('@');
+            return `${user.slice(0, 1)}****${user.slice(1)}@${domain}`;
+        },
+        deleteUser(id) {
+            this.users = this.users.filter((user) => user.id !== id);
+            console.log('Delete User:', id);
+        },
+        showDetail(user) {
+            this.selectedUser = user;
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+        },
+        reportUser(user) {
+            this.selectedUser = user;
+        },
+        closeReportModal() {
+            this.showReportModal = false;
+            this.reportHours = 0; // Reset hours
+        },
+        confirmReport() {
+            if (this.reportHours > 0) {
+                this.selectedUser.lockedHours = this.reportHours;
+                this.selectedUser.isReported = true; // Mark as reported
+
+                // Update the user in the users array
+                this.users = this.users.map(user =>
+                    user.id === this.selectedUser.id ? { ...user, isReported: true, lockedHours: this.reportHours } : user
+                );
+
+                alert(`User locked for ${this.reportHours} hours`);
+                this.closeReportModal();
+
+                // Automatically unlock after specified hours
+                setTimeout(() => {
+                    this.users = this.users.map(user =>
+                        user.id === this.selectedUser.id ? { ...user, isReported: false, lockedHours: 0 } : user
+                    );
+                }, this.reportHours * 3600000); // Convert hours to milliseconds
+            } else {
+                alert("Please enter a valid number of hours.");
+            }
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        },
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+            }
+        },
+    },
+};
+</script>
+<style scoped>
+a {
+    text-decoration: none;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #007bff;
+}
+
+.container {
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 2rem;
+    color: #333;
+}
+
+.card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 15px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+th {
+    background-color: #343a40;
+    color: #fff;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.delete-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.delete-btn i {
+    color: #dc3545;
+}
+
+.delete-btn:hover i {
+    color: #c82333;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+}
+
+.modal-content img {
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+.modal-content p {
+    margin-bottom: 10px;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #007bff;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    margin: 0 10px;
+    padding: 5px 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+    background-color: #0056b3;
+}
+
+.pagination button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    margin: 0 10px;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    th,
+    td {
+        white-space: nowrap;
+    }
+
+    .modal-content {
+        width: 90%;
+    }
+}
+
+.container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.card {
+    margin-top: 10px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #f2f2f2;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.pagination button {
+    margin: 0 5px;
+    padding: 5px 10px;
+}
+
+.modal-report {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-report-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    position: relative;
+}
+
+.modal-report .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    font-size: 18px;
+}
+</style>
