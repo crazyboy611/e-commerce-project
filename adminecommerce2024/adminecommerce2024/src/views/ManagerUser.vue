@@ -7,7 +7,7 @@
             <input type="text" v-model="searchQuery" placeholder="Search full name" class="form-control mb-3" />
         </div>
         <div class="card">
-            <table  v-if="filteredUsers.length">
+            <table v-if="filteredUsers.length">
                 <thead>
                     <tr>
                         <th>Stt</th>
@@ -15,19 +15,21 @@
                         <th>Address</th>
                         <th>Phone</th>
                         <th>Email</th>
-                        <th class="text-center">Report</th>
+                        <th>Status</th>
+                        <th class="text-center">Block</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(user, index) in paginatedUsers" :key="user.id"
-                        :class="{ 'bg-danger': user.isReported }">
+                    <tr v-for="(user, index) in paginatedUsers" :key="user.id" :class="{ 'bg-danger': !user.active }">
                         <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
                         <td><a href="#" @click="showDetail(user)">{{ user.full_name }}</a></td>
                         <td class="fw-bold">{{ user.address }}</td>
                         <td>{{ maskPhone(user.phone_number) }}</td>
                         <td class="fw-bold">{{ maskEmail(user.email) }}</td>
+                        <td v-if="user.active == true" class="text-success">Active</td>
+                        <td v-else class="text-danger">Inactive</td>
                         <td class="text-center">
-                            <input type="checkbox" @click="reportUser(user)" v-model="user.isReported">
+                            <input type="checkbox" :checked="!user.active" @change="blockUser(user, !user.active)">
                         </td>
                     </tr>
                 </tbody>
@@ -49,22 +51,11 @@
             <div class="modal-content">
                 <span class="close" @click="closeModal">&times;</span>
                 <h2>User Details</h2>
-                <img :src="selectedUser.image" alt="User Image" width="150" />
+                <img :src="imageUrl" alt="User Image" width="150" />
                 <p><strong>Name:</strong> {{ selectedUser.full_name }}</p>
                 <p><strong>Address:</strong> {{ selectedUser.address }}</p>
                 <p><strong>Phone:</strong> {{ maskPhone(selectedUser.phone_number) }}</p>
                 <p><strong>Email:</strong> {{ maskEmail(selectedUser.email) }}</p>
-            </div>
-        </div>
-
-        <!-- Report Hours Modal -->
-        <div v-if="showReportModal" class="modal-report" @click.self="closeReportModal">
-            <div class="modal-report-content">
-                <span class="close" @click="closeReportModal">&times;</span>
-                <h2>Report User</h2>
-                <p>Enter hours to lock the user:</p>
-                <input type="number" v-model="reportHours" min="1" />
-                <button @click="confirmReport">Confirm</button>
             </div>
         </div>
 
@@ -79,12 +70,13 @@ export default {
         return {
             users: [],
             showModal: false,
+            profileImage: '',
+            imageUrl: '',
+            provider: '',
             selectedUser: {},
             currentPage: 1,
             itemsPerPage: 5, // 5 items per page
             searchQuery: '',
-            showReportModal: false,
-            reportHours: 0,
         };
     },
     computed: {
@@ -102,6 +94,17 @@ export default {
             const end = start + this.itemsPerPage;
             return this.filteredUsers.slice(start, end);
         },
+        profileImageUrl() {
+            return this.imageUrl || '';
+        }
+    },
+    watch: {
+        profileImage: {
+            immediate: true,
+            handler() {
+                this.fetchProfileImage();
+            }
+        }
     },
     mounted() {
         this.fetchUser();
@@ -124,15 +127,8 @@ export default {
                 console.log(error);
             }
         },
-        // maskPhone(phone) {
-        //     return `${phone.slice(0, 3)}****${phone.slice(-3)}`;
-        // },
-        // maskEmail(email) {
-        //     const [user, domain] = email.split('@');
-        //     return `${user.slice(0, 1)}****${user.slice(1)}@${domain}`;
-        // },
         maskPhone(phone) {
-            if (!phone) return 'null'; // xử lý trường hợp null hoặc undefined
+            if (!phone) return 'null';
             return `${phone.slice(0, 3)}****${phone.slice(-3)}`;
         },
         maskEmail(email) {
@@ -147,39 +143,66 @@ export default {
         showDetail(user) {
             this.selectedUser = user;
             this.showModal = true;
+            this.profileImage = this.selectedUser.profile_image;
+            this.provider = this.selectedUser.provider;
+        },
+        async fetchProfileImage() {
+            const accessToken = sessionStorage.getItem('accessToken');
+            if (!accessToken) {
+                console.error('Access token not found.');
+                return;
+            }
+            if (this.provider == "google") {
+                this.imageUrl = this.profileImage;
+            }
+            else if (this.profileImage) {
+                console.log(this.provider);
+                try {
+                    const response = await axios.get(`http://localhost:8080/api/v1/users/profile_images/${this.profileImage}`, {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Accept': '*/*'
+                        },
+                        responseType: 'blob' // Get the image as a Blob
+                    });
+
+                    // Create an object URL for the blob and assign it to imageUrl
+                    this.imageUrl = URL.createObjectURL(response.data);
+                } catch (error) {
+                    console.error('Error fetching profile image:', error);
+                    this.imageUrl = '';
+                    if (error.response && error.response.status === 401) {
+                        console.error('Unauthorized access - check if the token is valid or has expired.');
+                    }
+                }
+            } else {
+                this.imageUrl = '';
+            }
         },
         closeModal() {
             this.showModal = false;
         },
-        reportUser(user) {
-            this.selectedUser = user;
-        },
-        closeReportModal() {
-            this.showReportModal = false;
-            this.reportHours = 0; // Reset hours
-        },
-        confirmReport() {
-            if (this.reportHours > 0) {
-                this.selectedUser.lockedHours = this.reportHours;
-                this.selectedUser.isReported = true; // Mark as reported
-
-                // Update the user in the users array
-                this.users = this.users.map(user =>
-                    user.id === this.selectedUser.id ? { ...user, isReported: true, lockedHours: this.reportHours } : user
-                );
-
-                alert(`User locked for ${this.reportHours} hours`);
-                this.closeReportModal();
-
-                // Automatically unlock after specified hours
-                setTimeout(() => {
-                    this.users = this.users.map(user =>
-                        user.id === this.selectedUser.id ? { ...user, isReported: false, lockedHours: 0 } : user
-                    );
-                }, this.reportHours * 3600000); // Convert hours to milliseconds
-            } else {
-                alert("Please enter a valid number of hours.");
+        async blockUser(user,isBlocking) {
+            try {
+                const response = await axios.put(`http://localhost:8080/api/v1/users/${user.id}`, { userId: user.id }, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                    }
+                });
+                if (response.data && response.data.status == 200) {
+                    user.active = !isBlocking;
+                    alert("Blocking successfully");
+                }
+                else {
+                    alert("BLocking failed");
+                    user.active = isBlocking;
+                }
             }
+            catch (error) {
+                alert("An error code");
+                user.active = isBlocking;
+            }
+
         },
         prevPage() {
             if (this.currentPage > 1) {

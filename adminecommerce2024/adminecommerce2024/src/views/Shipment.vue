@@ -11,10 +11,13 @@
         <thead>
           <tr>
             <th>Stt</th>
-            <th>Shipment</th>
+            <th>Description</th>
             <th>Type</th>
-            <th>Estimated Delivery Date</th>
+            <th>Create Date</th>
+            <th>Estimated Delivery</th>
             <th>Price</th>
+            <th>Status</th>
+            <th>Update Date</th>
             <th>Edit</th>
             <th>Delete</th>
           </tr>
@@ -22,10 +25,14 @@
         <tbody>
           <tr v-for="(shipment, index) in shipments" :key="shipment.id">
             <td>{{ index + 1 }}</td>
-            <td>{{ shipment.desc }}</td>
+            <td>{{ shipment.description }}</td>
             <td class="fw-bold">{{ shipment.type }}</td>
-            <td>{{ shipment.estimatedDeliveryDate }}</td>
-            <td class="fw-bold"><span class="text-danger me-1">$</span>{{ shipment.price | currency }}</td>
+            <td>{{ shipment.createdAt ? shipment.createdAt.split("T")[0] : 'N/A' }}</td>
+            <td class="text-center fw-bold">{{ shipment.estimated_day }}</td>
+            <td class="fw-bold">{{ shipment.price | currency }} <span class="text-danger me-1">VND</span></td>
+            <td v-if="shipment.active == true" class="text-success fw-bold">{{ shipment.active }}</td>
+            <td v-else class="text-danger fw-bold">{{ shipment.active }}</td>
+            <td>{{ shipment.updatedAt ? shipment.updatedAt.split("T")[0] : 'N/A' }}</td>
             <td>
               <button class="edit-btn" @click="editShipment(shipment)">
                 <i class="fa-solid fa-edit"></i>
@@ -41,30 +48,70 @@
       </table>
     </div>
 
-    <!-- Add/Edit Shipment Modal -->
-    <div v-if="showAddShipmentModal || showEditShipmentModal" class="modal">
+    <div v-if="showAddShipmentModal" class="modal">
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
-        <h2>{{ showEditShipmentModal ? 'Edit Shipment' : 'Add Shipment' }}</h2>
-        <form @submit.prevent="saveShipment">
+        <h2>Add Shipment</h2>
+        <form @submit.prevent="handleAddShipment">
           <div>
             <label for="desc">Description</label>
-            <input type="text" v-model="shipmentForm.desc" required>
+            <input type="text" v-model="newShipment.description" required>
+          </div>
+          <div>
+            <label for="type">Type</label>
+            <input type="text" v-model="newShipment.type" required>
+          </div>
+          <div>
+            <label for="">Estimated Delivery Date</label>
+            <input type="number" v-model="newShipment.estimated_day" required>
+          </div>
+          <div>
+            <label for="price">Price</label>
+            <input type="number" v-model="newShipment.price" required>
+          </div>
+          <div class="mb-3">
+            <label for="active">Active</label>
+            <select name="active" id="" v-model="newShipment.active" class="form-select">
+              <option :value="true">Yes</option>
+              <option :value="false">No</option>
+            </select>
+          </div>
+          <div class="text-end">
+            <button class="btn" type="submit">Add Shipment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div v-if="showEditShipmentModal" class="modal">
+      <div class="modal-content">
+        <span class="close" @click="closeModal">&times;</span>
+        <h2>Update Shipment</h2>
+        <form @submit.prevent="handleUpdateShipment(shipmentForm.id)">
+          <div>
+            <label for="desc">Description</label>
+            <input type="text" v-model="shipmentForm.description" required>
           </div>
           <div>
             <label for="type">Type</label>
             <input type="text" v-model="shipmentForm.type" required>
           </div>
           <div>
-            <label for="date">Estimated Delivery Date</label>
-            <input type="date" v-model="shipmentForm.estimatedDeliveryDate" required>
+            <label for="">Estimated Delivery Date</label>
+            <input type="number" v-model="shipmentForm.estimated_day" required>
           </div>
           <div>
             <label for="price">Price</label>
-            <input type="number" v-model="shipmentForm.price" required min="0">
+            <input type="number" v-model="shipmentForm.price" required>
+          </div>
+          <div class="mb-3">
+            <label for="active">Active</label>
+            <select name="active" id="" v-model="shipmentForm.active" class="form-select">
+              <option :value="true">Yes</option>
+              <option :value="false">No</option>
+            </select>
           </div>
           <div class="text-end">
-            <button class="btn" type="submit">{{ showEditShipmentModal ? 'Update' : 'Add' }} Shipment</button>
+            <button class="btn" type="submit">Update Shipment</button>
           </div>
         </form>
       </div>
@@ -78,65 +125,97 @@ export default {
   name: 'Shipment',
   data() {
     return {
-      shipments: [
-        {
-          id: 1,
-          desc: 'Regular shipment',
-          type: 'Free',
-          estimatedDeliveryDate: '2022-01-01',
-          price: 0.00,
-        },
-        {
-          id: 2,
-          desc: 'Express shipping',
-          type: 'Standard',
-          estimatedDeliveryDate: '2022-01-02',
-          price: 20.00,
-        },
-      ],
+      shipments: [],
       showAddShipmentModal: false,
       showEditShipmentModal: false,
       shipmentForm: {
         id: null,
-        desc: '',
-        type: '',
-        estimatedDeliveryDate: '',
-        price: 0,
+        description: null,
+        type: null,
+        estimated_day: null,
+        price: null,
+        active: null,
+      },
+      newShipment: {
+        description: "",
+        type: "",
+        estimated_day: null,
+        price: null,
+        active: null,
       },
     };
   },
-
+  created() {
+    this.fetchShipments();
+  },
   methods: {
-    // async fetchShipment(){
-    //   try {
-    //     const response = await axios.get('')
-    //   } catch (error) {
-        
-    //   }
-    // },
+    async fetchShipments() {
+      try {
+        const response = await axios.get('http://localhost:8080/api/v1/shipments',{
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+          },
+        });
+        this.shipments = response.data.data; 
+        this.shipmentForm = response.data.data;
+      } catch (error) {
+        console.error('Error fetching shipments:', error);
+      }
+    },
     addShipment() {
       this.showAddShipmentModal = true;
       this.clearForm();
+    },
+    async handleAddShipment() {
+      try{
+        const response = await axios.post(`http://localhost:8080/api/v1/shipments`,this.newShipment ,{
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+          },
+        });
+        alert("Add shipment successfully");
+        this.showAddShipmentModal = false;
+        window.location.reload();
+      }
+      catch (error) {
+        console.error('Error adding shipment:', error);
+      }
     },
     editShipment(shipment) {
       this.showEditShipmentModal = true;
       this.shipmentForm = { ...shipment };
     },
-    deleteShipment(id) {
-      this.shipments = this.shipments.filter(shipment => shipment.id !== id);
-    },
-    saveShipment() {
-      if (this.showEditShipmentModal) {
-        const index = this.shipments.findIndex(s => s.id === this.shipmentForm.id);
-        this.shipments.splice(index, 1, { ...this.shipmentForm });
+    async handleUpdateShipment(shipmentId){
+      try{
+        const response = axios.put(`http://localhost:8080/api/v1/shipments/${shipmentId}`,this.shipmentForm,{
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+          },
+        });
+        alert("Update shipment successfully");
         this.showEditShipmentModal = false;
-      } else {
-        this.shipmentForm.id = Date.now(); // Temporary ID generation
-        this.shipments.push({ ...this.shipmentForm });
-        this.showAddShipmentModal = false;
+        window.location.reload();
       }
-      this.clearForm();
+      catch (error) {
+        console.error('Error updating shipment:', error);
+      }
     },
+    async deleteShipment(id) {
+      confirm("Are you sure you want to delete?");
+      try{
+        const response = await axios.delete(`http://localhost:8080/api/v1/shipments/${id}`,{
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+          },
+        });
+        alert("Delete shipment successfully");
+        this.fetchShipments();
+      }
+      catch (error) {
+        console.error('Error deleting shipment:', error);
+      }
+    },
+    
     closeModal() {
       this.showAddShipmentModal = false;
       this.showEditShipmentModal = false;
@@ -144,12 +223,12 @@ export default {
     clearForm() {
       this.shipmentForm = {
         id: null,
-        desc: '',
-        type: '',
-        estimatedDeliveryDate: '',
-        price: 0,
-      };
-    }
+        description: null,
+        type: null,
+        estimatedDay: null,
+        price: null,
+      }
+    },
   },
   filters: {
     currency(value) {
