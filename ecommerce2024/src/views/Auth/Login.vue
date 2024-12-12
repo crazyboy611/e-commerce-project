@@ -32,14 +32,12 @@
                   <router-link v-if="emailOrPhone" to="/ForgotPassword">
                     Forgot Password?
                   </router-link>
-
-
                 </div>
               </div>
             </div>
             <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="rememberMe" v-model="rememberMe" />
-              <label class="form-check-label" for="rememberMe" >Remember me</label>
+              <label class="form-check-label" for="rememberMe">Remember me</label>
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
           </form>
@@ -78,6 +76,8 @@ export default {
       passwordError: "",
       loginType: "",
       password: '',
+      loginAttempts: 0, // Track login attempts
+      disableButton: false, // Toggle reCAPTCHA
       rememberMe: false,
     };
   },
@@ -114,7 +114,7 @@ export default {
       this.validatePassword();
       if (this.rememberMe) {
         const expiryDate = new Date();
-        expiryDate.setMonth(expiryDate.getMonth() + 1); 
+        expiryDate.setMonth(expiryDate.getMonth() + 1);
 
         localStorage.setItem(
           'rememberedPassword',
@@ -124,7 +124,6 @@ export default {
           })
         );
       } else {
-        // Clear stored password if "Remember Me" is unchecked
         localStorage.removeItem('rememberedPassword');
       }
       if (this.emailOrPhoneError || this.passwordError) return;
@@ -139,15 +138,24 @@ export default {
           sessionStorage.setItem("accessToken", accessToken);
           sessionStorage.setItem("fullName", fullName);
           alert("login ok");
-          const redirect = this.$route.query.redirect || '/'; // Redirect to the desired route or homepage
+          const redirect = this.$route.query.redirect || '/';
           this.$router.push(redirect);
+          this.loginAttempts = 0;
         }
         else {
+          this.loginAttempts++;
           alert("Login failed! Phone number, email, or password is incorrect.");
+        }
+        if (this.loginAttempts > 3) {
+          this.disableButton = true;
         }
       }
       catch (error) {
-        console.error(error.response.data.error);
+        this.loginAttempts++;
+        alert("Login failed! Phone number, email, or password is incorrect.");
+        if (this.loginAttempts > 3) {
+          this.disableButton = true;
+        }
       }
     },
     async loginWithGoogle() {
@@ -183,6 +191,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .container {

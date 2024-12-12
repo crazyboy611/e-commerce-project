@@ -94,21 +94,7 @@
             <form @submit.prevent="saveCategory">
               <div class="mb-3">
                 <label for="name" class="form-label">Category Name</label>
-                <input type="text" class="form-control" v-model="categoryForm.name" required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Subcategories</label>
-                <div v-for="(subCategory, index) in categoryForm.sub_categories" :key="index" class="input-group mb-2">
-                  <input type="text" class="form-control" v-model="subCategory.name" placeholder="Subcategory Name"
-                    required />
-                  <button type="button" class="btn btn-danger btn-sm" @click="removeSubCategory(index)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </div>
-                <br>
-                <button type="button" class="btn btn-primary btn-sm" @click="addSubCategory">
-                  <i class="fa-solid fa-plus"></i> Add Subcategory
-                </button>
+                <input type="text" class="form-control" v-model="newCategory.name" required>
               </div>
               <div class="text-end">
                 <button type="submit" class="btn btn-success">
@@ -134,6 +120,11 @@ export default {
       showEditCategoryModal: false,
       categoryForm: {
         id: null,
+        name: '',
+        description: '',
+        sub_categories: [],
+      },
+      newCategory: {
         name: '',
         description: '',
         sub_categories: [],

@@ -27,9 +27,9 @@
                         <td>{{ maskPhone(user.phone_number) }}</td>
                         <td class="fw-bold">{{ maskEmail(user.email) }}</td>
                         <td v-if="user.active == true" class="text-success">Active</td>
-                        <td v-else class="text-danger">Inactive</td>
+                        <td v-else class="text-warning">Inactive</td>
                         <td class="text-center">
-                            <input type="checkbox" :checked="!user.active" @change="blockUser(user, !user.active)">
+                            <input type="checkbox" :checked="!user.active" @change="blockUser(user, user.active)">
                         </td>
                     </tr>
                 </tbody>
@@ -182,27 +182,50 @@ export default {
         closeModal() {
             this.showModal = false;
         },
-        async blockUser(user,isBlocking) {
+        async blockUser(user, isBlocking) {
             try {
-                const response = await axios.put(`http://localhost:8080/api/v1/users/${user.id}`, { userId: user.id }, {
-                    headers: {
-                        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
-                    }
-                });
-                if (response.data && response.data.status == 200) {
-                    user.active = !isBlocking;
-                    alert("Blocking successfully");
-                }
-                else {
-                    alert("BLocking failed");
-                    user.active = isBlocking;
-                }
-            }
-            catch (error) {
-                alert("An error code");
-                user.active = isBlocking;
-            }
+                console.log('User:', user, 'IsBlocking:', isBlocking);
 
+                if (isBlocking) {
+                    // Chặn user (block)
+                    const response = await axios.delete(
+                        `http://localhost:8080/api/v1/users/${user.id}`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                            }
+                        }
+                    );
+
+                    if (response.data && response.data.status === 200) {
+                        user.active = false; // Cập nhật trạng thái thành không hoạt động
+                        alert("User has been blocked.");
+                    } else {
+                        alert("Failed to block user.");
+                    }
+                } else {
+                    // Bỏ chặn user (unblock)
+                    const response = await axios.put(
+                        `http://localhost:8080/api/v1/users/active/${user.id}`,
+                        {}, // Không cần body
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                            }
+                        }
+                    );
+
+                    if (response.data && response.data.status === 200) {
+                        user.active = true; // Cập nhật trạng thái thành hoạt động
+                        alert("User has been unblocked.");
+                    } else {
+                        alert("Failed to unblock user.");
+                    }
+                }
+            } catch (error) {
+                console.error("Error updating user status:", error);
+                alert("An error occurred while updating the user status.");
+            }
         },
         prevPage() {
             if (this.currentPage > 1) {

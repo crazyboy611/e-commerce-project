@@ -78,6 +78,12 @@ const routes = [
     name: 'ManagerProduct',
     component: () => import(/* webpackChunkName: "about" */ '../views/ManagerProduct.vue'),
     meta: { requiresAuth: true } // Protected route
+  },
+  {
+    path: '/ManagerContact',
+    name: 'ManagerContact',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ManagerContact.vue'),
+    meta: { requiresAuth: true } // Protected route
   }
 
 ]

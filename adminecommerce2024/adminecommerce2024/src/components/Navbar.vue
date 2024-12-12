@@ -229,6 +229,13 @@ export default {
                     iconClass: "fa-solid fa-hand-holding-dollar me-2",
                     subItems: null
                 },
+                
+                {
+                    name: "Manager Contact",
+                    link: "/ManagerContact",
+                    iconClass: "fa-regular fa-comment me-2",
+                    subItems: null
+                },
             ]
         };
     },
