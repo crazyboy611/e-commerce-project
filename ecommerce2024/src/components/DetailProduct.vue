@@ -1,5 +1,5 @@
 <template>
-    <div v-if="parsedProduct.category_name == 'Điện thoại'" class="container">
+    <div v-if="nameCategory == 'Điện thoại'" class="container">
         <div class="detail-content my-5 d-flex  flex-wrap justify-content-between">
             <div class="img d-flex">
                 <div class="image-product" v-if="parsedProduct.thumbnail">
@@ -200,7 +200,7 @@
             </div>
         </div>
     </div>
-    <div v-if="parsedProduct.category_name == 'Laptop'" class="container">
+    <div v-if="nameCategory == 'Laptop'" class="container">
         <div class="detail-content my-5 d-flex  flex-wrap justify-content-between">
             <div class="img d-flex">
                 <div class="image-product" v-if="parsedProduct.thumbnail">
@@ -467,6 +467,7 @@ export default {
             totalPages: 0,
             allComments: [],
             averageRating: 0.00,
+            nameCategory: "",
         };
     },
     created() {
@@ -482,6 +483,7 @@ export default {
                 const response = await axios.get(`http://localhost:8080/api/v1/products/details/${this.productId}`)
                 if (response.data.status === 200) {
                     this.parsedProduct = response.data.data;
+                    this.nameCategory = response.data.data.category.name;
                 }
                 else {
                     console.error('Error fetching product details:', response.data.message);
@@ -630,9 +632,9 @@ export default {
             const checkoutData = productArray.map(item => ({
                 id: item.id,
                 name: item.name,
-                quantity: item.quantity,
+                quantityPurchase: item.quantityPurchase,
                 price: item.price,
-                total: (item.price * item.quantity).toFixed(2),
+                total: (item.price * item.quantityPurchase).toFixed(2),
                 thumbnail: item.thumbnail,
                 color: item.color,
                 memory: item.memory,

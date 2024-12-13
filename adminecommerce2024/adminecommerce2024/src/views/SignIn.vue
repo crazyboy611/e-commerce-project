@@ -85,12 +85,18 @@ export default {
           const fullName = response.data.data.user_full_name;
           sessionStorage.setItem("accessToken", accessToken);
           sessionStorage.setItem("fullName", fullName);
-          alert("login ok");
-          setTimeout(() => {
-            location.reload(); // Reload the current page
-          }, 500);
+          if (sessionStorage.getItem("fullName") == 'admin') {
+            alert("login ok");
+            setTimeout(() => {
+              location.reload(); // Reload the current page
+            }, 500);
 
-          this.$router.push("/");
+            this.$router.push("/");
+          }
+          else {
+            alert("Login failed! Only admin can access this page.");
+            this.$router.push("/SignIn");
+          }
         } else {
           alert("Login failed! Phone number, email, or password is incorrect.");
         }

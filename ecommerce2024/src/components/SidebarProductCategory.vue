@@ -63,7 +63,7 @@
       <label for="priceRange" class="form-label">
         Price Range: <span class="text-danger fs-5 ms-3">{{ priceRange }} VND</span>
       </label>
-      <input type="range" class="form-range" id="priceRange" v-model="priceRange" min="1" max="10000"
+      <input type="range" class="form-range" id="priceRange" v-model="priceRange" min="1" max="10000000"
         @input="updatePriceRange" />
     </div>
   </div>

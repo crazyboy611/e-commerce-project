@@ -39,7 +39,10 @@
               </button>
             </td>
             <td>
-              <button class="delete-btn" @click="deleteShipment(shipment.id)">
+              <button v-if="shipment.active==false" class="btn-disabled" disabled>
+                <i class="fa-solid fa-trash"></i>
+              </button>
+              <button v-else class="delete-btn" @click="deleteShipment(shipment.id)">
                 <i class="fa-solid fa-trash"></i>
               </button>
             </td>
@@ -201,7 +204,9 @@ export default {
       }
     },
     async deleteShipment(id) {
-      confirm("Are you sure you want to delete?");
+      if (!confirm("Are you sure you want to delete?")) {
+        return;
+      }
       try{
         const response = await axios.delete(`http://localhost:8080/api/v1/shipments/${id}`,{
           headers: {

@@ -9,9 +9,9 @@
       </div>
       <div class="tab" :class="{ active: activeTab === 'processing' }" @click="filterOrders('processing')">Đang xử lý
       </div>
-      <div class="tab" :class="{ active: activeTab === 'deliveried' }" @click="filterOrders('deliveried')">Đang giao
+      <div class="tab" :class="{ active: activeTab === 'shipped' }" @click="filterOrders('shipped')">Đang giao
         hàng</div>
-      <div class="tab" :class="{ active: activeTab === 'shipped' }" @click="filterOrders('shipped')">Đã nhận hàng</div>
+      <div class="tab" :class="{ active: activeTab === 'delivered ' }" @click="filterOrders('delivered')">Đã nhận hàng</div>
       <div class="tab" :class="{ active: activeTab === 'cancelled' }" @click="filterOrders('cancelled')">Đã hủy</div>
     </div>
     <div class="order-list">
@@ -19,8 +19,8 @@
         <div class="p_status d-flex justify-content-end">
           <div v-if="order.status === 'pending'">CHƯA XỬ LÝ</div>
           <div v-else-if="order.status === 'processing'">ĐANG XỬ LÝ</div>
-          <div v-else-if="order.status === 'deliveried'">ĐANG GIAO HÀNG</div>
-          <div v-else-if="order.status === 'shipped'">ĐÃ NHẬN</div>
+          <div v-else-if="order.status === 'shipped'">ĐANG GIAO HÀNG</div>
+          <div v-else-if="order.status === 'delivered '">ĐÃ NHẬN</div>
           <div v-else-if="order.status === 'cancelled'">ĐÃ HỦY</div>
         </div>
         <hr>
@@ -32,11 +32,11 @@
                   :alt="product.product_name" @click="showOrderDetails(order)" />
                 <div class="order-details" @click="showOrderDetails(order)">
                   <div class="product-name">{{ product.product_name }}</div>
-                  <div class="product-quantity">Số lượng: {{ product.number_of_products }}</div>
-                  <div class="product-price">Giá: {{ product.unit_price.toLocaleString() }} VND</div>
+                  <div class="product-quantity">Số lượng: {{ product.quantity }}</div>
+                  <div class="product-price">Giá: {{ product.price }} VND</div>
                 </div>
               </div>
-              <div v-if="order.status === 'shipped' && order.payment_details.paid == true">
+              <div v-if="order.status === 'delivered' && order.payment_details.paid == true">
                 <router-link :to="{ name: 'DetailProduct', params: { product: product.product_id } }">
                   <button class="review-button">
                     Đánh giá
@@ -46,20 +46,24 @@
             </div>
           </div>
           <div>
-            <div class="order-total">Tổng đơn hàng: {{ order.payment_details.amount.toLocaleString() }} VND</div>
+            <div class="order-total">Tổng đơn hàng: {{ order.payment_details.amount }} VND</div>
             <div>
-              <button v-if="order.payment_details.paid == true && order.status === 'deliveried'" class="received-button"
+              <button v-if="order.status === 'shipped'" class="received-button"
                 @click="markAsReceived(order)">
                 Đã nhận được hàng
-              </button>
+              </button><br>
+              <button v-if="order.status === 'pending'" class="buy-again-button"
+                @click="markCancelled(order)">
+                Huỷ
+              </button><br>
               <button v-if="order.payment_details.paid === false && order.payment_details.provider == 'vnpay'"
-                class="buy-again-button" @click="paymentAgain(order.payment_details)">
+                class="received-button" @click="paymentAgain(order.payment_details)">
                 Thanh toán
-              </button>
-              <button v-if="order.status === 'cancelled'" class="buy-again-button"
+              </button><br>
+              <button v-if="order.status === 'cancelled' || order.status == 'delivered'" class="buy-again-button"
                 @click="buyAgain(order.order_details)">
                 Mua lại
-              </button>
+              </button><br>
 
             </div>
           </div>
@@ -75,10 +79,10 @@
         <p><strong>Số điện thoại:</strong> {{ selectedOrder.receiver_phone_number }}</p>
         <p><strong>Email người mua:</strong> {{ selectedOrder.buyer_email }}</p>
         <p><strong>Ghi chú:</strong> {{ selectedOrder.note || 'Không có ghi chú' }}</p>
-        <p><strong>Ngày đặt hàng:</strong> {{ new Date(selectedOrder.order_date).toLocaleString() }}</p>
+        <p><strong>Ngày đặt hàng:</strong> {{ selectedOrder.order_date.split('T')[0] }}</p>
         <p><strong>Trạng thái:</strong> {{ selectedOrder.status }}</p>
-        <p><strong>Tổng tiền:</strong> {{ selectedOrder.payment_details.amount.toLocaleString() }} $</p>
-        <p><strong>Phương thức vận chuyển:</strong> {{ selectedOrder.shipping_method }}</p>
+        <p><strong>Tổng tiền:</strong> {{ selectedOrder.payment_details.amount }} VND</p>
+        <p><strong>Phương thức vận chuyển:</strong> {{ selectedOrder.shipment.type }}</p>
         <p><strong>Địa chỉ nhận hàng:</strong> {{ selectedOrder.shipping_address }}</p>
         <p><strong>Ngày giao hàng:</strong> {{ selectedOrder.shipping_date }}</p>
         <p><strong>Phương thức thanh toán:</strong> {{ selectedOrder.payment_details.provider }}</p>
@@ -164,11 +168,11 @@ export default {
       try {
         const updateStatus = {
           orderId: order.id,
-          status: 'shipped'
+          status: 'delivered'
         };
 
         const response = await axios.put(
-          `http://localhost:8080/api/v1/orders/update_status/${order.id}?status=shipped`,
+          `http://localhost:8080/api/v1/orders/update_status/${order.id}?status=delivered`,
           updateStatus,
           {
             headers: {
@@ -192,6 +196,39 @@ export default {
         }
       }
     },
+    async markCancelled(order) {
+      // console.log(order);
+      try {
+        const updateStatus = {
+          orderId: order.id,
+          status: 'cancelled'
+        };
+
+        const response = await axios.put(
+          `http://localhost:8080/api/v1/orders/update_status/${order.id}?status=cancelled`,
+          updateStatus,
+          {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+            },
+          }
+        );
+
+        if (response.data && response.data.status === 200) {
+          alert("Đã huỷ đơn hàng thành công!");
+          this.fetchOrders(); 
+        } else {
+          alert("Đã xảy ra lỗi khi huỷ đơn hàng!");
+        }
+      } catch (error) {
+        console.error("Error marking order as cancelled:", error);
+        if (error.response && error.response.status === 401) {
+          alert("Authentication error: Please log in again.");
+        } else {
+          alert("An error occurred. Please try again.");
+        }
+      }
+    },
     selectProduct() {
       console.log("Selected product:", this.selectedProduct);
     },
@@ -205,10 +242,10 @@ export default {
       const checkoutData = orderDetails.map(detail => ({
         id: detail.product_id,
         name: detail.product_name,
-        quantity: detail.number_of_products || 1,
-        price: detail.unit_price || 0,
-        total: detail.unit_price && detail.number_of_products
-          ? detail.unit_price * detail.number_of_products
+        quantity: detail.quantity || 1,
+        price: detail.price || 0,
+        total: detail.price && detail.quantity
+          ? detail.price * detail.quantity
           : 0,
         thumbnail: detail.thumbnail
       }));

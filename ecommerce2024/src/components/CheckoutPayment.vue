@@ -30,7 +30,7 @@
                                                 class="fa-solid fa-plus fw-bold"></i></button>
                                     </div>
                                     <div class="price me-3">
-                                        <p class="mb-0 fw-bold">{{ (item.price * item.quantity).toFixed(2) }} VND</p>
+                                        <p class="mb-0 fw-bold">{{ (item.price * item.quantity).toFixed(3) }} VND</p>
                                     </div>
                                 </div>
                             </div>
@@ -39,7 +39,7 @@
                     <div v-else>
                         <p>No items in the cart.</p>
                     </div>
-                    <div class="payment card p-5 ">
+                    <div class="payment card p-5">
                         <p class="text-center fw-bold fs-4">Total</p>
                         <div v-if="isEmail" class="mt-3">
                             <label for="phone">Phone Number</label>
@@ -72,26 +72,24 @@
                         <p class="fw-bold">Shipment Method: </p>
                         <div class="d-flex justify-content-between">
                             <div class="me-4">
-                                <p>{{ selectedShipment.type }}</p>
+                                <p class="fw-bold text-danger">{{ selectedShipment.type }}</p>
                             </div>
                             <div class="me-3">
-                                <p>{{ selectedShipment.price }}.00 VND</p>
+                                <p class="fw-bold text-danger">{{ selectedShipment.price }}.000 VND</p>
                             </div>
                         </div>
                         <div class="d-flex justify-content-between">
                             <div class="me-4">
                                 <p>Subtotal:</p>
-                                <p>Estimated Tax:</p>
-                                <p :class="{ 'text-throught': isDiscountApplied }">Estimated Shipping & Handling:</p>
+                                <p v-if="isDiscountApplied" class="text-danger fw-bold">Discount</p>
                                 <p class="fs-4">Total:</p>
                             </div>
                             <div>
-                                <p>{{ calculateSubtotal().toFixed(2) }} VND</p>
-                                <p>50.00 VND</p>
-                                <p :class="{ 'text-throught': isDiscountApplied }">
-                                    {{ isDiscountApplied ? '29.00' : '29.00' }} VND
+                                <p>{{ calculateSubtotal().toFixed(3) }} VND</p>
+                                <p v-if="isDiscountApplied" class="text-danger">
+                                    {{ isDiscountApplied ? '-29.000' : '0' }} VND
                                 </p>
-                                <p class="fs-4 text-danger">{{ calculateTotal().toFixed(2) }} VND</p>
+                                <p class="fs-4 text-danger">{{ calculateTotal().toFixed(3) }} VND</p>
                             </div>
                         </div>
                         <div class="mt-3 text-start">
@@ -179,7 +177,6 @@ export default {
     },
     methods: {
         increaseQuantity(item) {
-            // Increment quantity
             item.quantity++;
             this.updateSessionCart();
         },
@@ -198,9 +195,8 @@ export default {
         },
         calculateTotal() {
             const subtotal = this.calculateSubtotal();
-            const estimatedTax = 50; // Fixed tax amount
-            const shippingAndHandling = this.isDiscountApplied ? 0 : 29; // Adjust based on discount
-            return subtotal + estimatedTax + shippingAndHandling + this.selectedShipment.price;
+            const shippingAndHandling = this.isDiscountApplied ? 29 : 0; // Adjust based on discount
+            return subtotal - shippingAndHandling + this.selectedShipment.price;
         },
         validateDiscountCode() {
             const isValidCode = this.discountCode.some((code) => code.code === this.enteredCode.trim());
@@ -254,12 +250,15 @@ export default {
                 shipment_id: this.selectedShipment.id,
                 shipping_address: this.addressUser,
                 shipping_date: this.selectedShipment.date,
-                // coupon_code: this.enteredCode || '',
                 cart_items: this.selectedItems.map((item) => ({
                     product_id: item.id,
                     name: item.name,
                     quantity: item.quantity,
                 })),
+                payment_details: {
+                    amount: amount,
+                    provider: this.paymentMethod
+                }
 
             };
             try {
@@ -334,6 +333,7 @@ export default {
 }
 
 .payment {
+    width: 50%;
     background-color: rgb(238, 237, 237);
     border-radius: 8px;
     /* Added border radius for smoother edges */

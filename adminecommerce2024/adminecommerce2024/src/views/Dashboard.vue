@@ -2,44 +2,20 @@
     <div class="my-5">
         <div class="dashboard container-fluid d-flex justify-content-between flex-wrap">
             <div class="left-section">
-                <div class="d-flex container-fluid flex-wrap mb-5">
-                    <router-link to="/HistoryOrderUser" class="flex-item">
-                        <div class="card total-delivery-success">
-                            <p>Products purchased this month</p>
-                            <p class="fs-5">234 products</p>
-                        </div>
-                    </router-link>
-                    <router-link to="/HistoryOrderUser" class="flex-item">
-                        <div class="card total-delivery-cancelled">
-                            <p>Total products bestseller</p>
-                            <p class="fs-5">15 products</p>
-                        </div>
-                    </router-link>
-                    <router-link to="/HistoryOrder" class="flex-item">
-                        <div class="card total-inventory">
-                            <p>Inventory products</p>
-                            <p class="fs-5">50 products</p>
-                        </div>
-                    </router-link>
-                    <router-link to="/HistoryOrder" class="flex-item">
-                        <div class="card total-revenue">
-                            <p>Total revenue of the month</p>
-                            <p class="fs-5"><span class="text-danger">$</span>500.00</p>
-                        </div>
-                    </router-link>
-                </div>
-
                 <!-- Product Sales Line Chart -->
-                <div class="w-100 mb-5">
+                <div class=" mb-5">
+                    <h2>Revenue</h2>
+                    <input type="number" name="year" v-model="selectedYear" @change="fetchRevenueData"
+                        placeholder="Enter Year" class="form-control mb-3" />
                     <v-card>
-                        <v-card-title class="fw-bold fs-3">Product Sales</v-card-title>
                         <v-card-text>
-                            <apexchart type="line" :options="productSalesOptions" :series="productSalesSeries" />
+                            <apexchart type="bar" :options="productSalesOptions" :series="productSalesSeries"
+                                width="100%" height="350" />
                         </v-card-text>
                     </v-card>
                 </div>
                 <div class="text-end mt-5">
-                    <button class="btn btn-secondary">
+                    <button class="btn btn-secondary" >
                         <i class="fa-solid fa-plus me-2"></i>Report sale
                     </button>
                 </div>
@@ -49,9 +25,8 @@
                 <v-card>
                     <v-card-title class="fw-bold fs-3">Products Bestseller</v-card-title>
                     <div class="text-end my-4">
-
                         <!-- Sort by Select Dropdown -->
-                        <select v-model="sortOrder" @change="sortProducts" class="mb-3">
+                        <select v-model="sortOrder" @change="sortProducts" class="form-select mb-3">
                             <option value="asc">Ascending</option>
                             <option value="desc">Descending</option>
                         </select>
@@ -76,13 +51,11 @@
                 </v-card>
             </div>
         </div>
-        <div class="inventory">
-            
-        </div>
     </div>
 </template>
 
 <script>
+import axios from "axios";
 import VueApexCharts from "vue3-apexcharts";
 
 export default {
@@ -92,26 +65,55 @@ export default {
     },
     data() {
         return {
-            // Product Sales Line Chart Data
+            selectedYear: 2024,
             productSalesOptions: {
                 chart: {
-                    type: "line",
+                    type: 'bar',
                     height: 350,
                     toolbar: {
                         show: true,
                     },
                 },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: "50%",
+                        endingShape: "rounded",
+                    },
+                },
+                dataLabels: {
+                    enabled: false,
+                },
                 xaxis: {
-                    categories: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                    categories: [
+                        "Tháng 1",
+                        "Tháng 2",
+                        "Tháng 3",
+                        "Tháng 4",
+                        "Tháng 5",
+                        "Tháng 6",
+                        "Tháng 7",
+                        "Tháng 8",
+                        "Tháng 9",
+                        "Tháng 10",
+                        "Tháng 11",
+                        "Tháng 12",
+                    ],
+                },
+                tooltip: {
+                    y: {
+                        formatter: function (value) {
+                            return `$${value.toFixed(3)}`;
+                        },
+                    },
                 },
             },
             productSalesSeries: [
                 {
-                    name: "Sales",
-                    data: [620, 800, 700, 780, 660, 900, 840],
+                    name: "Revenue",
+                    data: [],
                 },
             ],
-            // Upcoming Schedules
             productBestSellers: [
                 {
                     id: 1,
@@ -144,14 +146,11 @@ export default {
                     quantity_sold: 25
                 }
             ],
-            sortOrder: 'asc', // Initial sort order
-            expandedIndex: null, // Track which card is expanded
+            sortOrder: 'asc',
+            expandedIndex: null,
         };
     },
     computed: {
-        limitedSchedules() {
-            return this.productBestSellers.slice(Math.max(this.productBestSellers.length - 5, 0));
-        },
         sortedProducts() {
             return this.productBestSellers.slice().sort((a, b) =>
                 this.sortOrder === 'asc'
@@ -161,36 +160,36 @@ export default {
         },
     },
     methods: {
-        downloadExcel() {
-            const data = this.productSalesSeries[0].data.map((value, index) => {
-                return {
-                    Day: this.productSalesOptions.xaxis.categories[index],
-                    Sales: value,
-                };
-            });
+        async fetchRevenueData() {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/v1/statistics/monthly_revenue?year=${this.selectedYear}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                    },
+                });
 
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Product Sales");
+                if (response.data.status === 200) {
+                    const apiData = response.data.data;
+                    const monthlyRevenue = Array(12).fill(0);
 
-            XLSX.writeFile(wb, "product_sales_report.xlsx");
-        },
-        toggleSortOrder() {
-            this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-        },
-        openModal(product) {
-            this.selectedProduct = product;
-        },
-        closeModal() {
-            this.selectedProduct = null;
-        },
-        sortProducts() {
-            // Trigger sort when sortOrder changes
-            this.sortedProducts;
+                    apiData.forEach(({ month, revenue }) => {
+                        monthlyRevenue[month - 1] = revenue;
+                    });
+
+                    this.productSalesSeries[0].data = monthlyRevenue;
+                } else {
+                    console.error("Failed to fetch data: ", response.data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching revenue data: ", error);
+            }
         },
         toggleDetails(index) {
             this.expandedIndex = this.expandedIndex === index ? null : index;
         },
+    },
+    mounted() {
+        this.fetchRevenueData();
     },
 };
 </script>
@@ -289,6 +288,7 @@ a {
     /* Amber */
     color: #333;
 }
+
 /* Hover Effects */
 .card:hover {
     transform: scale(1.05);
@@ -309,7 +309,8 @@ a {
     font-size: 0.9rem;
     color: #555;
 }
-select{
+
+select {
     border: none;
     outline-style: none;
     padding: 10px;
