@@ -88,7 +88,7 @@ export default {
           if (sessionStorage.getItem("fullName") == 'admin') {
             alert("login ok");
             setTimeout(() => {
-              location.reload(); // Reload the current page
+              location.reload();
             }, 500);
 
             this.$router.push("/");
@@ -96,6 +96,7 @@ export default {
           else {
             alert("Login failed! Only admin can access this page.");
             this.$router.push("/SignIn");
+            sessionStorage.clear();
           }
         } else {
           alert("Login failed! Phone number, email, or password is incorrect.");

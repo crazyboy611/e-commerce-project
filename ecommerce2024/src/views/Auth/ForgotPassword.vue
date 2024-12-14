@@ -82,9 +82,8 @@ export default {
       }
     },
 
-    // Handle back navigation
     handleBack() {
-      this.$router.back(); // Navigates to the previous page
+      this.$router.back(); 
     }
   }
 };

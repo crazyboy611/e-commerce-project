@@ -3,16 +3,6 @@
     <div class="header">
       <h1 class="text-start">Orders Users</h1>
     </div>
-    <div class="d-flex">
-      <div class="card card-total total-delivery-success me-5 fs-5">
-        <p>Total deliveries success of the month</p>
-        <p>{{ totalDeliveriesSuccess }} deliveries</p>
-      </div>
-      <div class="card card-total total-delivery-cancelled fs-5">
-        <p>Total deliveries cancelled of the month</p>
-        <p>{{ totalDeliveriesCancelled }} deliveries</p>
-      </div>
-    </div>
     <div class="search-sort">
       <input type="text" v-model="searchQuery" placeholder="Search product or User..." class="form-control mb-3" />
     </div>

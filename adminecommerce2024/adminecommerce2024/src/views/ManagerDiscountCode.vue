@@ -18,7 +18,7 @@
         <table v-if="filteredDiscounts.length">
           <thead>
             <tr>
-              <th>#</th>
+              <th>ID</th>
               <th>Code</th>
               <th>Description</th>
               <th>Discount</th>

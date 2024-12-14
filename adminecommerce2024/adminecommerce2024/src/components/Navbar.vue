@@ -214,7 +214,7 @@ export default {
                     isDropdownOpen: false,
                     subItems: [
                         { name: "History Orders", link: "/HistoryOrder" },
-                        { name: "History Orders User", link: "/HistoryOrderUser" }
+                        { name: "Manage Order Status", link: "/HistoryOrderUser" }
                     ]
                 },
                 {

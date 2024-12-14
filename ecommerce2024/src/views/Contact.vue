@@ -66,7 +66,7 @@ export default {
             if (this.checkValidate()) {
                 const ideaUser = {
                     fullName : this.name,
-                    email : this.email,
+                    emailOrPhoneNumber : this.email,
                     content : this.message,
                 }
                 try {
