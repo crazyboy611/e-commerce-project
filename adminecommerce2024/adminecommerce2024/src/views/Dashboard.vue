@@ -5,8 +5,13 @@
                 <!-- Product Sales Line Chart -->
                 <div class=" mb-5">
                     <h2>Revenue</h2>
-                    <input type="number" name="year" v-model="selectedYear" @change="fetchRevenueData"
-                        placeholder="Enter Year" class="form-control mb-3" />
+                    <div class="d-flex my-4">
+                        <p>Year <input type="number" name="year" v-model="selectedYear" @change="fetchRevenueData"
+                                placeholder="Enter Year" class=" mb-3 rounded" /></p>
+                        <p>Total revennue year: <span class="text-danger fw-bold" v-if="totalRevenueYear">{{
+                            totalRevenueYear.toFixed(3) }} VND</span><span class="text-danger fw-bold" v-else>0
+                                VND</span></p>
+                    </div>
                     <v-card>
                         <v-card-text>
                             <apexchart type="bar" :options="productSalesOptions" :series="productSalesSeries"
@@ -14,10 +19,52 @@
                         </v-card-text>
                     </v-card>
                 </div>
-                <div class="text-end mt-5">
-                    <button class="btn btn-secondary" >
-                        <i class="fa-solid fa-plus me-2"></i>Report sale
-                    </button>
+                <div class="my-4">
+                    <h2>Product Sales</h2>
+                    <p>Month <input type="number" name="month" v-model="selectedMonth" @change="fetchRevenueProduct"
+                            placeholder="Enter month" class=" my-3 rounded" /></p>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity Sold</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(product, index) in productSale" :key="index">
+                                <td>
+                                    <a href="#" @click.prevent="viewProductDetails(product.product_id)">
+                                        {{ product.product_id }}
+                                    </a>
+                                </td>
+                                <td>{{ product.quantity }}</td>
+                                <td><span class="text-danger fs-5">{{ product.revenue.toFixed(3) }} VND</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div v-if="showProductDetailsModal" class="modal" @click.self="closeProductModal">
+                        <div class="modal-content">
+                            <span class="close fs-3 fw-bold" @click="closeProductModal">&times;</span>
+                            <h2>Product Details</h2>
+                            <img :src="`http://localhost:8080/api/v1/products/images/${detailProductSeller.thumbnail}`"
+                                alt="Product Image" class="img-fluid mb-3" />
+                            <p><strong>Product Name:</strong> {{ detailProductSeller.name }}</p>
+                            <p><strong>Price:</strong> ${{ detailProductSeller.price }}</p>
+                            <p>Quantity: {{ detailProductSeller.quantity }}</p>
+                        </div>
+                    </div>
+                    <div class="pagination d-flex justify-content-center mt-4">
+                        <button class="btn btn-primary mx-2" :disabled="currentPage === 0"
+                            @click="changePage(currentPage - 1)">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <span>{{ currentPage + 1 }} of {{ totalPages }}</span>
+                        <button class="btn btn-primary mx-2" :disabled="currentPage + 1 >= totalPages"
+                            @click="changePage(currentPage + 1)">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -65,7 +112,15 @@ export default {
     },
     data() {
         return {
-            selectedYear: 2024,
+            selectedYear: new Date().getFullYear(),
+            selectedMonth: new Date().getMonth() + 1,
+            currentPage: 0,
+            totalPages: 0,
+            pageSize: 5,
+            productSale: [],
+            detailProductSeller: [],
+            showProductDetailsModal: false,
+            totalRevenueYear: 0,
             productSalesOptions: {
                 chart: {
                     type: 'bar',
@@ -103,7 +158,7 @@ export default {
                 tooltip: {
                     y: {
                         formatter: function (value) {
-                            return `$${value.toFixed(3)}`;
+                            return `${value.toFixed(3)} VND`;
                         },
                     },
                 },
@@ -177,6 +232,12 @@ export default {
                     });
 
                     this.productSalesSeries[0].data = monthlyRevenue;
+                    const response2 = await axios.get(`http://localhost:8080/api/v1/statistics/yearly_revenue?year=${this.selectedYear}`, {
+                        headers: {
+                            'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                        },
+                    });
+                    this.totalRevenueYear = response2.data.data.revenue;
                 } else {
                     console.error("Failed to fetch data: ", response.data.message);
                 }
@@ -184,12 +245,53 @@ export default {
                 console.error("Error fetching revenue data: ", error);
             }
         },
+        async fetchRevenueProduct() {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/v1/statistics/product_revenue?month=${this.selectedMonth}&year=${this.selectedYear}&size=${this.pageSize}&page=${this.currentPage}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                    },
+                });
+                this.productSale = response.data.data.content;
+                this.totalPages = response.data.data.totalPages;
+                this.currentPage = response.data.data.pageable.pageNumber;
+            }
+            catch (error) {
+                alert("Error fetching revenue product data");
+                console.error("Error fetching revenue product data: ", error);
+            }
+        },
+        changePage(newPage) {
+            if (newPage >= 0 && newPage < this.totalPages) {
+                this.currentPage = newPage;
+                this.fetchRevenueProduct();
+            }
+        },
+        async viewProductDetails(productId) {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/v1/products/details/${productId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                    },
+                });
+                this.detailProductSeller = response.data.data;
+                this.showProductDetailsModal = true;
+            }
+            catch (error) {
+                console.error("Error fetching product details: ", error);
+            }
+        },
+        closeProductModal() {
+            this.showProductDetailsModal = false;
+        },
         toggleDetails(index) {
             this.expandedIndex = this.expandedIndex === index ? null : index;
         },
     },
     mounted() {
         this.fetchRevenueData();
+        this.fetchRevenueProduct();
+        this.viewProductDetails();
     },
 };
 </script>
@@ -315,4 +417,50 @@ select {
     outline-style: none;
     padding: 10px;
 }
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 500px;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #333;
+}
+
+.close:hover {
+    color: #dc3545;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    color: #343a40;
+}
+
+.modal-content p {
+    font-size: 1.1rem;
+    margin: 10px 0;
+    color: #495057;
+}
+
 </style>
