@@ -3,7 +3,7 @@
         <div class="my-5">
             <h1>Payment VNPay</h1>
             <p><span>Order: </span>{{ orderId }}</p>
-            <p><span>Amount: </span>{{ amount }} VND</p>
+            <p><span>Amount: </span>{{ currencyFormat(amount) }} </p>
             <button @click="paymentVNPay" class="btn btn-primary">
                 Pay with VNPay
                 <div class="spinner-border text-primary" v-if="loading" role="status">
@@ -37,6 +37,10 @@ export default {
         }
     },
     methods: {
+        currencyFormat(value) {
+            if (!value) return "0 VNĐ";
+            return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+        },
         async paymentVNPay() {
             const orderTransfer = {
                 order_id: this.orderId,

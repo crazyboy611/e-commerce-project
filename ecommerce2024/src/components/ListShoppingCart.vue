@@ -12,8 +12,6 @@
           </div>
           <div class="me-3 flex-grow-1">
             <p class="product-name text-bold mb-0">{{ item.name }}</p>
-            <p class="mb-0 text-muted"><span class="text-black fw-bold">Memory : </span>{{ item.memory }} - <span
-                class="text-black fw-bold">Color : </span>{{ item.color }}</p>
           </div>
           <div class="quantity d-flex align-items-center me-3">
             <button class="btn btn-outline-secondary btn-quantity" @click="decreaseQuantity(item)"><i
@@ -23,7 +21,7 @@
                 class="fa-solid fa-plus fw-bold"></i></button>
           </div>
           <div class="price me-3">
-            <p class="mb-0">{{ (item.price * item.quantity).toFixed(2) }} VND</p>
+            <p class="mb-0">{{ currencyFormat(item.price * item.quantity) }}</p>
           </div>
           <div>
             <button class="close-btn" @click="removeFromCart(item)">
@@ -37,7 +35,7 @@
       <div class="card p-3 mt-5">
         <div class="d-flex fs-5">
           <p class="me-5">SubTotal</p>
-          <p class="ms-5">{{ calculateSubtotal() }} VND</p>
+          <p class="ms-5">{{ currencyFormat(calculateSubtotal()) }}</p>
         </div>
         <button class="btn btn-dark mt-2" @click="checkoutSelectedItems">Check out</button>
       </div>
@@ -70,7 +68,10 @@ export default {
     });
   },
   methods: {
-
+    currencyFormat(value) {
+      if (!value) return "0 VNĐ";
+      return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+    },
     removeFromCart(product) {
       const updatedCart = this.cartItems.filter(item => item.id !== product.id);
       this.cartItems = updatedCart;
@@ -83,7 +84,7 @@ export default {
         this.updateSessionStorage();
         this.$emit('update-cart', this.cartItems);
       }
-      else{
+      else {
         alert("Not enough products");
       }
     },

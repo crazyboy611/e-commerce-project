@@ -11,7 +11,8 @@
       </div>
       <div class="tab" :class="{ active: activeTab === 'shipped' }" @click="filterOrders('shipped')">Đang giao
         hàng</div>
-      <div class="tab" :class="{ active: activeTab === 'delivered ' }" @click="filterOrders('delivered')">Đã nhận hàng</div>
+      <div class="tab" :class="{ active: activeTab === 'delivered ' }" @click="filterOrders('delivered')">Đã nhận hàng
+      </div>
       <div class="tab" :class="{ active: activeTab === 'cancelled' }" @click="filterOrders('cancelled')">Đã hủy</div>
     </div>
     <div class="order-list">
@@ -26,6 +27,11 @@
         <hr>
         <div class="product-list d-flex justify-content-between">
           <div>
+            <div>OrderID: <span class="fw-bold">{{ order.id }}</span></div>
+            <div>
+              Order date: {{ order.order_date.split('T')[0] }} <br>
+              Shipment date: {{ order.shipping_date }}
+            </div>
             <div v-for="product in order.order_details" :key="product.id" class="product-item">
               <div class="d-flex align-items-center">
                 <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
@@ -33,7 +39,7 @@
                 <div class="order-details" @click="showOrderDetails(order)">
                   <div class="product-name">{{ product.product_name }}</div>
                   <div class="product-quantity">Số lượng: {{ product.quantity }}</div>
-                  <div class="product-price">Giá: {{ product.price }} VND</div>
+                  <div class="product-price">Giá: {{ currencyFormat(product.price) }}</div>
                 </div>
               </div>
               <div v-if="order.status === 'delivered' && order.payment_details.paid == true">
@@ -46,14 +52,12 @@
             </div>
           </div>
           <div>
-            <div class="order-total">Tổng đơn hàng: {{ order.payment_details.amount }} VND</div>
+            <div class="order-total">Tổng đơn hàng: {{ currencyFormat(order.payment_details.amount) }}</div>
             <div>
-              <button v-if="order.status === 'shipped'" class="received-button"
-                @click="markAsReceived(order)">
+              <button v-if="order.status === 'shipped'" class="received-button" @click="markAsReceived(order)">
                 Đã nhận được hàng
               </button><br>
-              <button v-if="order.status === 'pending'" class="buy-again-button"
-                @click="markCancelled(order)">
+              <button v-if="order.status === 'pending'" class="buy-again-button" @click="markCancelled(order)">
                 Huỷ
               </button><br>
               <button v-if="order.payment_details.paid === false && order.payment_details.provider == 'vnpay'"
@@ -81,7 +85,7 @@
         <p><strong>Ghi chú:</strong> {{ selectedOrder.note || 'Không có ghi chú' }}</p>
         <p><strong>Ngày đặt hàng:</strong> {{ selectedOrder.order_date.split('T')[0] }}</p>
         <p><strong>Trạng thái:</strong> {{ selectedOrder.status }}</p>
-        <p><strong>Tổng tiền:</strong> {{ selectedOrder.payment_details.amount }} VND</p>
+        <p><strong>Tổng tiền:</strong> {{ currencyFormat(selectedOrder.payment_details.amount) }}</p>
         <p><strong>Phương thức vận chuyển:</strong> {{ selectedOrder.shipment.type }}</p>
         <p><strong>Địa chỉ nhận hàng:</strong> {{ selectedOrder.shipping_address }}</p>
         <p><strong>Ngày giao hàng:</strong> {{ selectedOrder.shipping_date }}</p>
@@ -129,6 +133,10 @@ export default {
     },
   },
   methods: {
+    currencyFormat(value) {
+      if (!value) return "0 VNĐ";
+      return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+    },
     async fetchOrders(status = 'all') {
       try {
         const statusParam = status !== 'all' ? `&status=${status}` : '';
@@ -183,7 +191,7 @@ export default {
 
         if (response.data && response.data.status === 200) {
           alert("Đã nhận đơn hàng thành công!");
-          this.fetchOrders(); 
+          this.fetchOrders();
         } else {
           alert("Đã xảy ra lỗi khi nhận đơn hàng!");
         }
@@ -216,7 +224,7 @@ export default {
 
         if (response.data && response.data.status === 200) {
           alert("Đã huỷ đơn hàng thành công!");
-          this.fetchOrders(); 
+          this.fetchOrders();
         } else {
           alert("Đã xảy ra lỗi khi huỷ đơn hàng!");
         }

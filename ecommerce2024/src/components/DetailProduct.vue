@@ -16,23 +16,7 @@
             </div>
             <div class="content ms-5 mt-3">
                 <h2>{{ parsedProduct.name }}</h2>
-                <p class="fs-1 fw-bold text-danger">{{ parsedProduct.price }} VND</p>
-                <div class="d-flex">
-                    <p class="fw-bold">Select color :</p>
-                    <div class="color d-flex ms-4">
-                        <div v-for="color in ['black', 'gold', 'red', 'white', 'blue']" :key="color"
-                            :class="['checkbox', color, { active: selectedColor === color }]"
-                            @click="selectColor(color)">
-                        </div>
-                    </div>
-                </div>
-                <p class="fw-bold">Select memory :</p>
-                <div class="d-flex justify-content-evenly mt-3">
-                    <div v-for="memory in ['64GB', '128GB', '256GB', '1TB']" :key="memory"
-                        :class="['memory', { active: selectedMemory === memory }]" @click="selectMemory(memory)">
-                        {{ memory }}
-                    </div>
-                </div>
+                <p class="fs-1 fw-bold text-danger">{{ currencyFormat(parsedProduct.price) }}</p>
                 <div class=" mt-3 mb-2">
                     <p class="">{{ parsedProduct.description }}</p>
                 </div>
@@ -217,23 +201,7 @@
             </div>
             <div class="content ms-5 mt-3">
                 <h2>{{ parsedProduct.name }}</h2>
-                <p class="fs-1 fw-bold text-danger">{{ parsedProduct.price }} VND</p>
-                <div class="d-flex">
-                    <p class="fw-bold">Select color :</p>
-                    <div class="color d-flex ms-4">
-                        <div v-for="color in ['black', 'gold', 'red', 'white', 'blue']" :key="color"
-                            :class="['checkbox', color, { active: selectedColor === color }]"
-                            @click="selectColor(color)">
-                        </div>
-                    </div>
-                </div>
-                <p class="fw-bold">Select memory :</p>
-                <div class="d-flex justify-content-evenly mt-3">
-                    <div v-for="memory in ['64GB', '128GB', '256GB', '1TB']" :key="memory"
-                        :class="['memory', { active: selectedMemory === memory }]" @click="selectMemory(memory)">
-                        {{ memory }}
-                    </div>
-                </div>
+                <p class="fs-1 fw-bold text-danger">{{ currencyFormat(parsedProduct.price) }}</p>
                 <div class=" mt-3 mb-2">
                     <p class="">{{ parsedProduct.description }}</p>
                 </div>
@@ -416,7 +384,7 @@
                             <h3 class="card-title mb-2 text-center">{{ product.name }}</h3>
                             <p class="card-text text-center">{{ product.description }}</p>
                             <p class="card-text text-center text-muted">{{ product.category_name }}</p>
-                            <p class="card-text text-center"><strong>{{ product.price }}</strong> VND</p>
+                            <p class="card-text text-center"><strong>{{ currencyFormat(product.price) }}</strong></p>
                             <div class="my-2 mt-3 text-center">
                                 <!-- Pass product data via route params -->
                                 <router-link :to="{ name: 'Checkout', params: { product: JSON.stringify(product) } }">
@@ -441,7 +409,7 @@ export default {
     name: 'DetailProduct',
     props: {
         product: {
-            type: String, 
+            type: String,
             required: true
         },
         parsedProduct: {
@@ -454,8 +422,6 @@ export default {
             discountProducts: [],
             parsedProduct: {},
             productId: null,
-            selectedColor: null,
-            selectedMemory: null,
             rating: 0,
             hoverRating: 0,
             comment: "",
@@ -478,6 +444,10 @@ export default {
         }
     },
     methods: {
+        currencyFormat(value) {
+            if (!value) return "0 VNĐ";
+            return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+        },
         async fetchProductDetails() {
             try {
                 const response = await axios.get(`http://localhost:8080/api/v1/products/details/${this.productId}`)
@@ -523,14 +493,6 @@ export default {
             const attribute = this.parsedProduct.attributes.find(attr => attr.name === attributeName);
             return attribute ? attribute.value : "N/A";
         },
-        selectColor(color) {
-            this.selectedColor = color;
-            this.updateParsedProduct(); // Update parsedProduct when color is selected
-        },
-        selectMemory(memory) {
-            this.selectedMemory = memory;
-            this.updateParsedProduct(); // Update parsedProduct when memory is selected
-        },
         updateParsedProduct() {
             this.parsedProduct = {
                 ...this.parsedProduct,
@@ -539,19 +501,17 @@ export default {
             };
             console.log("Parsed product updated:", this.parsedProduct);
         },
-        // Phương thức lấy class cho từng ngôi sao
         getStarClass(index) {
             if (index < this.hoverRating || (this.hoverRating === 0 && index < this.rating)) {
                 return 'fa-solid fa-star text-warning';
             }
             return 'fa-regular fa-star';
         },
-        // Phương thức đặt rating khi click vào ngôi sao
         setRating(index) {
             this.rating = index + 1;
         },
         // Phương thức thay đổi giá trị hoverRating khi di chuột qua ngôi sao
-        handleHover(index) { // Đã thay đổi tên phương thức thành handleHover
+        handleHover(index) { 
             this.hoverRating = index + 1;
         },
         // Phương thức reset lại hoverRating khi rời chuột khỏi ngôi sao
@@ -595,7 +555,8 @@ export default {
                     alert("Review submitted successfully!");
                     this.comment = "";
                     this.rating = 0;
-                    window.location.reload();
+                    // window.location.reload();
+                    this.fetchReivewUser();
                 }
                 else {
                     alert("An unexpected error occurred. Please try again.");
@@ -634,8 +595,6 @@ export default {
                 price: item.price,
                 total: (item.price * item.quantityPurchase).toFixed(2),
                 thumbnail: item.thumbnail,
-                color: item.color,
-                memory: item.memory,
             }));
 
             // Store it in sessionStorage as a stringified array
@@ -648,7 +607,7 @@ export default {
             const checkoutData = {
                 id: product.id,
                 name: product.name,
-                quantity: 1, // Assuming quantity 1 if it's not specified
+                quantity: 1, 
                 price: product.price,
                 total: (product.price),
                 thumbnail: product.thumbnail

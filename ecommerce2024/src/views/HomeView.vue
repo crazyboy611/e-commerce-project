@@ -150,7 +150,7 @@
         </div>
     </section>
 
-    <section class="section-6 my-5"  id="home-view-discount">
+    <section class="section-6 my-5" id="home-view-discount">
         <div class="container">
             <h3>Discount up to <span class="text-danger">50%</span></h3>
             <div class="row my-5">
@@ -164,11 +164,12 @@
                             <h3 class="card-title mb-2 text-center">{{ product.name }}</h3>
                             <p class="card-text text-center">{{ product.description }}</p>
                             <p class="card-text text-center text-muted">{{ product.category_name }}</p>
-                            <p class="card-text text-center"><strong>{{ product.price }}</strong> VND</p>
+                            <p class="card-text text-center"><strong>{{ currencyFormat(product.price) }}</strong></p>
                             <div class="my-2 mt-3 text-center">
                                 <!-- Pass product data via route params -->
                                 <router-link :to="{ name: 'Checkout', params: { product: JSON.stringify(product) } }">
-                                    <button class="btn btn-dark px-5 my-1" @click="purchaseProduct(product)">Purchase</button>
+                                    <button class="btn btn-dark px-5 my-1"
+                                        @click="purchaseProduct(product)">Purchase</button>
                                 </router-link>
                             </div>
                         </div>
@@ -216,8 +217,8 @@ export default {
                     name: 'iPhone 14 Blue',
                     image: require('../ImageProduct/ip14_1TB_blue.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -229,8 +230,8 @@ export default {
                     name: 'iPhone 14 Yellow',
                     image: require('../ImageProduct/ip14_1TB_yellow.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -242,8 +243,8 @@ export default {
                     name: 'iPhone 14 Classic',
                     image: require('../ImageProduct/ip14pro1.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -255,8 +256,8 @@ export default {
                     name: 'Sam Sung 1',
                     image: require('../ImageProduct/samsung1.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -268,8 +269,8 @@ export default {
                     name: 'Sam Sung 2',
                     image: require('../ImageProduct/samsung2.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -281,8 +282,8 @@ export default {
                     name: 'Ipad 1',
                     image: require('../ImageProduct/ipad2.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -294,8 +295,8 @@ export default {
                     name: 'iPad 2',
                     image: require('../ImageProduct/ipad9.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -307,8 +308,8 @@ export default {
                     name: 'iPad 2',
                     image: require('../ImageProduct/ipad9.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -320,8 +321,8 @@ export default {
                     name: 'iPad 2',
                     image: require('../ImageProduct/ipad9.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -333,8 +334,8 @@ export default {
                     name: 'iPad 2',
                     image: require('../ImageProduct/ipad9.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -346,8 +347,8 @@ export default {
                     name: 'iPad 2',
                     image: require('../ImageProduct/ipad9.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -359,8 +360,8 @@ export default {
                     name: 'iPad 2',
                     image: require('../ImageProduct/ipad9.png'),
                     description: 'Latest model with A14 Bionic chip...',
-                    price: 15000000,
-                    oldPrice: 17000000,
+                    price: '15.000.000',
+                    oldPrice: '17.000.000',
                     details: [
                         'A14 Bionic chip',
                         '5G capability',
@@ -468,7 +469,7 @@ export default {
             const checkoutData = {
                 id: product.id,
                 name: product.name,
-                quantity: 1, // Assuming quantity 1 if it's not specified
+                quantity: 1, 
                 price: product.price,
                 total: (product.price),
                 thumbnail: product.thumbnail
@@ -477,7 +478,11 @@ export default {
             sessionStorage.setItem('checkProductCart', JSON.stringify([checkoutData]));
 
             this.$router.push({ name: 'Checkout', params: { product: JSON.stringify(checkoutData) } });
-        }
+        },
+        currencyFormat(value) {
+            if (!value) return "0 VNĐ";
+            return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+        },
 
     },
 

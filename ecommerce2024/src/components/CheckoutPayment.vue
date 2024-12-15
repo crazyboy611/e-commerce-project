@@ -15,9 +15,6 @@
                                     </div>
                                     <div class="me-3 flex-grow-1">
                                         <p class="product-name text-bold mb-0">{{ item.name }}</p>
-                                        <small class="mb-0 text-muted"><span class="text-black fw-bold">Memory :
-                                            </span>{{ item.memory }} - <span class="text-black fw-bold">Color :
-                                            </span>{{ item.color }}</small>
                                     </div>
                                     <div class="quantity d-flex align-items-center mx-3">
                                         <button class="btn btn-outline-secondary btn-quantity"
@@ -30,7 +27,7 @@
                                                 class="fa-solid fa-plus fw-bold"></i></button>
                                     </div>
                                     <div class="price me-3">
-                                        <p class="mb-0 fw-bold">{{ (item.price * item.quantity).toFixed(3) }} VND</p>
+                                        <p class="mb-0 fw-bold">{{ currencyFormat(item.price * item.quantity) }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -75,7 +72,7 @@
                                 <p class="fw-bold text-danger">{{ selectedShipment.type }}</p>
                             </div>
                             <div class="me-3">
-                                <p class="fw-bold text-danger">{{ selectedShipment.price }}.000 VND</p>
+                                <p class="fw-bold text-danger">{{ currencyFormat(selectedShipment.price) }}</p>
                             </div>
                         </div>
                         <div class="d-flex justify-content-between">
@@ -89,7 +86,7 @@
                                 <p v-if="isDiscountApplied" class="text-danger">
                                     {{ isDiscountApplied ? '-29.000' : '0' }} VND
                                 </p>
-                                <p class="fs-4 text-danger">{{ calculateTotal().toFixed(3) }} VND</p>
+                                <p class="fs-4 text-danger">{{ currencyFormat(calculateTotal()) }}</p>
                             </div>
                         </div>
                         <div class="mt-3 text-start">
@@ -176,6 +173,10 @@ export default {
         }
     },
     methods: {
+        currencyFormat(value) {
+            if (!value) return "0 VNĐ";
+            return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+        },
         increaseQuantity(item) {
             if (item.quantity < item.quantityInStock) {
                 item.quantity++;

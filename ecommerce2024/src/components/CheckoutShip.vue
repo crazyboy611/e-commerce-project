@@ -17,7 +17,7 @@
                         </label>
                     </div>
                     <div>
-                        <span class="fw-bold">{{ shipment.price.toFixed(3) }} VND</span>
+                        <span class="fw-bold">{{ currencyFormat(shipment.price) }} </span>
                     </div>
                 </div>
             </div>
@@ -65,6 +65,10 @@ export default {
         };
     },
     methods: {
+        currencyFormat(value) {
+            if (!value) return "0 VNĐ";
+            return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+        },
         getShipments(day) {
             const today = new Date();
             today.setDate(today.getDate() + day);

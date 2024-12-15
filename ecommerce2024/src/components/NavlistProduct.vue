@@ -24,7 +24,7 @@
 
     <div class="mt-5">
       <label for="priceRange" class="form-label">
-        Price Range: <span class="text-danger fs-5 ms-3">{{ priceRange }} VND</span>
+        Price Range: <span class="text-danger fs-5 ms-3">{{ currencyFormat(priceRange) }}</span>
       </label>
       <input type="range" class="form-range" id="priceRange" v-model="priceRange" min="1" max="10000000"
         @input="updatePriceRange" />
@@ -55,6 +55,10 @@ export default {
     this.fetchCategories();
   },
   methods: {
+    currencyFormat(value) {
+      if (!value) return "0 VNĐ";
+      return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+    },
     async fetchCategories() {
       try {
         const response = await axios.get('http://localhost:8080/api/v1/categories');

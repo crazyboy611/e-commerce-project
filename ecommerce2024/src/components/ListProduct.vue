@@ -27,11 +27,13 @@
       <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3" v-for="(product, index) in products" :key="product.id">
         <div class="card h-100 d-flex flex-column">
           <div class="card-body d-flex flex-column">
-            <i class="fa-solid fa-cart-shopping text-end fs-5" @click="addToCart(product.id)"></i>
+            <router-link class="text-end"
+              :to="{ name: 'ShoppingCartView', params: { product: JSON.stringify(product) } }"> <i
+                class="fa-solid fa-cart-shopping text-end fs-5" @click="addToCart(product.id)"></i></router-link>
             <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
               class="img-fluid card-img-top p-5" :alt="product.name">
             <h5 class="card-title mb-2 text-center">{{ product.name }}</h5>
-            <p class="text-center fw-bold fs-5"><span class="text-danger">{{ product.price }} VND</span></p>
+            <p class="text-center fw-bold fs-5"><span class="text-danger">{{ currencyFormat(product.price) }}</span></p>
             <div class="my-2 mt-auto text-center">
               <router-link :to="{ name: 'DetailProduct', params: { product: product.id } }">
                 <button>Show Detail</button>
@@ -42,7 +44,6 @@
       </div>
     </div>
 
-    <!-- Pagination -->
     <nav>
       <ul class="pagination justify-content-center">
         <li class="page-item" :class="{ disabled: currentPage === 1 }">
@@ -67,11 +68,14 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 
 export default {
   data() {
     return {
       search: '',
+      parsedProduct: []
     };
   },
   props: {
@@ -96,11 +100,8 @@ export default {
     setDefailtImage(event) {
       event.src = this.defaultImage;
     },
-    addToCart(productId) {
-      // Logic to add the product to the cart
-    },
     sortBy(criteria) {
-      let direction = null; 
+      let direction = null;
       if (criteria === 'priceAsc') {
         criteria = 'price';
         direction = 'asc';
@@ -108,7 +109,7 @@ export default {
         criteria = 'price';
         direction = 'desc';
       } else {
-        direction = 'desc'; 
+        direction = 'desc';
       }
 
       this.$emit('sort', { criteria, direction });
@@ -116,14 +117,36 @@ export default {
     emitSearch() {
       this.$emit('search', this.search);
     },
+    async addToCart(productId) {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/v1/products/details/${productId}`, {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+          }
+        });
+        this.parsedProduct = response.data.data;
+      }
+      catch (error) {
+        console.error(error);
+      }
+    },
+    currencyFormat(value) {
+      if (!value) return "0 VNĐ";
+      return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+    },
   },
 };
 </script>
 
 <style scoped>
-i{
+a {
+  color: rgb(228, 64, 64);
+}
+
+i {
   cursor: pointer;
 }
+
 a {
   text-decoration: none;
 }
