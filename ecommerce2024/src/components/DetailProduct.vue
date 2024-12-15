@@ -441,7 +441,7 @@ export default {
     name: 'DetailProduct',
     props: {
         product: {
-            type: String, // Giả sử product được truyền vào dưới dạng chuỗi
+            type: String, 
             required: true
         },
         parsedProduct: {
@@ -625,14 +625,12 @@ export default {
             this.collapsed = !this.collapsed;
         },
         purchaseProduct() {
-            // Ensure parsedProduct is an array
             const productArray = Array.isArray(this.parsedProduct) ? this.parsedProduct : [this.parsedProduct];
-
-            // Map over the array to format the checkout data
             const checkoutData = productArray.map(item => ({
                 id: item.id,
                 name: item.name,
-                quantityPurchase: item.quantityPurchase,
+                quantity: 1,
+                quantityInStock: item.quantity,
                 price: item.price,
                 total: (item.price * item.quantityPurchase).toFixed(2),
                 thumbnail: item.thumbnail,

@@ -1,18 +1,19 @@
 <template>
   <div class="d-flex justify-content-between flex-wrap my-5">
     <div class="my-5 list-cart">
-      <!-- Loop through cartItems and display each product -->
       <div class="list-product list-group list-group-flush" v-for="(item, index) in cartItems" :key="index">
         <div class="d-flex align-items-center my-3">
           <div class="form-check" checkoutSelectedItems>
             <input type="checkbox" class="form-check-input" :id="'checkout-item-' + index" v-model="item.checked" />
           </div>
           <div class="me-3">
-            <img :src="`http://localhost:8080/api/v1/products/images/${item.thumbnail}`" alt="Product Image" width="100px" />
+            <img :src="`http://localhost:8080/api/v1/products/images/${item.thumbnail}`" alt="Product Image"
+              width="100px" />
           </div>
           <div class="me-3 flex-grow-1">
             <p class="product-name text-bold mb-0">{{ item.name }}</p>
-            <p class="mb-0 text-muted"><span class="text-black fw-bold">Memory : </span>{{ item.memory }} - <span class="text-black fw-bold">Color : </span>{{ item.color }}</p>
+            <p class="mb-0 text-muted"><span class="text-black fw-bold">Memory : </span>{{ item.memory }} - <span
+                class="text-black fw-bold">Color : </span>{{ item.color }}</p>
           </div>
           <div class="quantity d-flex align-items-center me-3">
             <button class="btn btn-outline-secondary btn-quantity" @click="decreaseQuantity(item)"><i
@@ -48,44 +49,43 @@
 export default {
   name: 'ListShoppingCart',
   props: {
-    cartItems: Array, // Accept cartItems as prop from parent, if necessary
+    cartItems: Array,
   },
   data() {
     return {
-      // Initialize cartItems as an empty array by default
       cartItems: [],
+      quantityInStock: 0,
     };
   },
   created() {
-    // Load cart data from sessionStorage if available
     const storedCart = sessionStorage.getItem('cartProducts');
     if (storedCart) {
       this.cartItems = JSON.parse(storedCart);
     }
-    // Ensure each item has a default quantity of 1 if not already set
     this.cartItems.forEach(item => {
       if (!item.quantity || item.quantity < 1) {
-        item.quantity = 1; // Directly set the quantity property
+        item.quantity = 1;
       }
+      this.quantityInStock = item.quantityInStock;
     });
   },
   methods: {
+
     removeFromCart(product) {
-      // Remove product from cartItems array
       const updatedCart = this.cartItems.filter(item => item.id !== product.id);
       this.cartItems = updatedCart;
-
-      // Update sessionStorage with the modified cart items
       sessionStorage.setItem('cartProducts', JSON.stringify(this.cartItems));
-
-      // Emit the updated cart items to notify parent components, if needed
       this.$emit('update-cart', this.cartItems);
     },
     increaseQuantity(item) {
-      // Increment quantity
-      item.quantity++;
-      this.updateSessionStorage();
-      this.$emit('update-cart', this.cartItems);
+      if (item.quantity < item.quantityInStock) {
+        item.quantity++;
+        this.updateSessionStorage();
+        this.$emit('update-cart', this.cartItems);
+      }
+      else{
+        alert("Not enough products");
+      }
     },
     decreaseQuantity(item) {
       if (item.quantity > 1) {
@@ -95,33 +95,28 @@ export default {
       }
     },
     updateSessionStorage() {
-      // Helper method to keep session storage in sync with cartItems
       sessionStorage.setItem('cartProducts', JSON.stringify(this.cartItems));
     },
     calculateSubtotal() {
       const total = this.cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-      return parseFloat(total.toFixed(2)); // Rounds to 2 decimal places and converts back to float
+      return parseFloat(total.toFixed(3));
     },
     proceedToCheckout() {
       this.$router.push('/checkout');
     },
     checkoutSelectedItems() {
-      // Create an array of selected items
       const selectedItems = this.cartItems.filter(item => item.checked);
-
-      // Proceed only if there are selected items
       if (selectedItems.length === 0) {
         alert('Please select at least one item to check out.');
         return;
       }
-
-      // You can adjust the data passed to the checkout page
       const checkoutData = selectedItems.map(item => ({
         id: item.id,
         name: item.name,
         quantity: item.quantity,
+        quantityInStock: item.quantityInStock,
         price: item.price,
-        total: (item.price * item.quantity).toFixed(2),
+        total: (item.price * item.quantity).toFixed(3),
         thumbnail: item.thumbnail,
         color: item.color,
         memory: item.memory,

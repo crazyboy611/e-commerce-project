@@ -147,26 +147,18 @@ export default {
             this.provider = this.selectedUser.provider;
         },
         async fetchProfileImage() {
-            const accessToken = sessionStorage.getItem('accessToken');
-            if (!accessToken) {
-                console.error('Access token not found.');
-                return;
-            }
             if (this.provider == "google") {
                 this.imageUrl = this.profileImage;
             }
-            else if (this.profileImage) {
+            else if (this.provider == null) {
                 console.log(this.provider);
                 try {
                     const response = await axios.get(`http://localhost:8080/api/v1/users/profile_images/${this.profileImage}`, {
                         headers: {
-                            'Authorization': `Bearer ${accessToken}`,
-                            'Accept': '*/*'
+                            'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
                         },
-                        responseType: 'blob' // Get the image as a Blob
+                        responseType: 'blob'
                     });
-
-                    // Create an object URL for the blob and assign it to imageUrl
                     this.imageUrl = URL.createObjectURL(response.data);
                 } catch (error) {
                     console.error('Error fetching profile image:', error);
@@ -198,8 +190,9 @@ export default {
                     );
 
                     if (response.data && response.data.status === 200) {
-                        user.active = false; // Cập nhật trạng thái thành không hoạt động
+                        user.active = false; 
                         alert("User has been blocked.");
+                        this.fetchUser();
                     } else {
                         alert("Failed to block user.");
                     }
@@ -218,6 +211,7 @@ export default {
                     if (response.data && response.data.status === 200) {
                         user.active = true; // Cập nhật trạng thái thành hoạt động
                         alert("User has been unblocked.");
+                        this.fetchUser();
                     } else {
                         alert("Failed to unblock user.");
                     }

@@ -178,7 +178,7 @@ export default {
         });
         alert("Add shipment successfully");
         this.showAddShipmentModal = false;
-        window.location.reload();
+        this.fetchShipments();
       }
       catch (error) {
         console.error('Error adding shipment:', error);
@@ -197,7 +197,7 @@ export default {
         });
         alert("Update shipment successfully");
         this.showEditShipmentModal = false;
-        window.location.reload();
+        this.fetchShipments();
       }
       catch (error) {
         console.error('Error updating shipment:', error);

@@ -97,7 +97,7 @@ export default {
             products: [],
             currentPage: 0,
             totalPages: 0,
-            pageSize: 2,
+            pageSize: 5,
             showUserDetailsModal: false,
             showCommentDetailsModal: false,
             showProductDetailsModal: false,
@@ -238,7 +238,7 @@ td {
 thead th {
     background-color: #343a40;
     color: white;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 tbody tr {

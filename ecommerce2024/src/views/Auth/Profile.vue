@@ -145,7 +145,7 @@ export default {
                 console.error('Access token not found.');
                 return;
             }
-            if (no_password === 'false') {
+            if (no_password === false) {
                 this.imageUrl = this.profileImage;
             }
             else if (this.profileImage) {
@@ -155,20 +155,19 @@ export default {
                             'Authorization': `Bearer ${accessToken}`,
                             'Accept': '*/*'
                         },
-                        responseType: 'blob' // Get the image as a Blob
+                        responseType: 'blob' 
                     });
 
-                    // Create an object URL for the blob and assign it to imageUrl
                     this.imageUrl = URL.createObjectURL(response.data);
                 } catch (error) {
                     console.error('Error fetching profile image:', error);
-                    this.imageUrl = ''; // Clear image URL if an error occurs
+                    this.imageUrl = ''; 
                     if (error.response && error.response.status === 401) {
                         console.error('Unauthorized access - check if the token is valid or has expired.');
                     }
                 }
             } else {
-                this.imageUrl = ''; // Clear URL if no profile image
+                this.imageUrl = '';
             }
         },
         async saveProfile() {

@@ -177,8 +177,13 @@ export default {
     },
     methods: {
         increaseQuantity(item) {
-            item.quantity++;
-            this.updateSessionCart();
+            if (item.quantity < item.quantityInStock) {
+                item.quantity++;
+                this.updateSessionCart();
+            }
+            else{
+                alert("Not enough products");
+            }
         },
         decreaseQuantity(item) {
             if (item.quantity > 1) {

@@ -31,40 +31,39 @@ export default {
         };
     },
     created() {
-        // Retrieve existing cart items from sessionStorage
+
         const storedCart = sessionStorage.getItem('cartProducts');
 
-        // Parse the product from the route prop
+
         try {
             this.parsedProduct = JSON.parse(decodeURIComponent(this.product));
 
-            // If there are existing items, parse them; otherwise, initialize an empty array
             this.cartItems = storedCart ? JSON.parse(storedCart) : [];
 
-            // Add the new parsed product as a cartProduct object to the cartItems list
             const cartProduct = {
                 id: this.parsedProduct.id,
                 name: this.parsedProduct.name,
-                image: this.parsedProduct.image,  // Assuming the image is a URL
-                quantity: 1,  // Starting quantity for a new product in the cart
+                image: this.parsedProduct.image,
+                quantity: 1,
+                quantityInStock: this.parsedProduct.quantity,
                 price: this.parsedProduct.price,
                 thumbnail: this.parsedProduct.thumbnail,
                 color: this.parsedProduct.color,
                 memory: this.parsedProduct.memory
             };
 
-            // Check if the product is already in the cart to avoid duplicates
             const existingProduct = this.cartItems.find(item => item.id === cartProduct.id);
 
             if (existingProduct) {
-                // If product exists, increase the quantity
-                existingProduct.quantity += 1;
+                if (existingProduct.quantity + 1 > existingProduct.quantityInStock) {
+                    alert(`Not enough products`);
+                    existingProduct.quantity = existingProduct.quantityInStock;
+                } else {
+                    existingProduct.quantity += 1;
+                }
             } else {
-                // If product doesn't exist, add it as a new cartProduct
                 this.cartItems.push(cartProduct);
             }
-
-            // Store the updated cartItems list as 'cartProducts' in sessionStorage
             sessionStorage.setItem('cartProducts', JSON.stringify(this.cartItems));
         } catch (error) {
             console.error('Error parsing product:', error);
@@ -84,10 +83,12 @@ export default {
 .cart-view {
     margin: 8% 0;
 }
-a{
+
+a {
     text-decoration: none;
 }
-a:hover{
+
+a:hover {
     color: #333;
 }
 </style>

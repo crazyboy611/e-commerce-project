@@ -1,16 +1,49 @@
 <template>
   <div class="container">
-    <div class="header d-flex">
-      <div>
-        <h1>History Orders</h1>
-      </div>
-    </div>
-    <div class="search-sort">
-      <input type="text" v-model="searchQuery" placeholder="Search OrderID" class="form-control mb-3" />
+    <div class="header">
+      <h1>History Orders</h1>
+      <input type="text" v-model="searchQuery" placeholder="Search by Order ID" class="form-control mb-4"
+        @change="searchOrderId" />
     </div>
     <div class="card">
       <div class="table-responsive">
-        <table v-if="filteredOrders.length">
+        <table v-if="orderData">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Order date</th>
+              <th>Shipping date</th>
+              <th>Provider</th>
+              <th>Status</th>
+              <th>Paid</th>
+              <th>Total Money</th>
+              <th>Detail</th>
+              <th>Edit status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(order, index) in orderData" :key="order.id"
+              :class="{ 'bg-danger': order.status == 'cancelled', 'bg-success': order.status == 'delivered' }">
+              <td>{{ order.id }}</td>
+              <td>{{ order.order_date.split('T')[0] }}</td>
+              <td>{{ order.shipping_date }}</td>
+              <td>{{ order.payment_details.provider }}</td>
+              <td>{{ order.status }}</td>
+              <!-- <td v-if="order.payment_details.paid == true" class="text-success fw-bold">{{ order.payment_details.paid
+                }}</td>
+              <td v-else class="text-danger fw-bold">{{ order.payment_details.paid }}</td> -->
+              <td>{{ order.payment_details.paid }}</td>
+              <td class="">{{ order.payment_details.amount.toFixed(3) }} VND</td>
+              <td>
+                <button @click="viewOrderDetails(order)"><i class="fa-solid fa-circle-info"></i></button>
+              </td>
+              <td>
+                <button @click="editStatus(order)"><i class="fa-solid fa-pencil"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table v-else-if="orderSearchData">
           <thead>
             <tr>
               <th>Order ID</th>
@@ -24,16 +57,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(order, index) in paginatedOrders" :key="order.id">
-              <td>{{ order.id }}</td>
-              <td>{{ order.order_date.split('T')[0] }}</td>
-              <td>{{ order.shipping_date }}</td>
-              <td>{{ order.payment_details.provider }}</td>
-              <td>{{ order.status }}</td>
-              <td class="">{{ order.shipping_address }}</td>
-              <td class="text-danger">{{ order.payment_details.amount.toFixed(3) }} VND</td>
+            <tr>
+              <td>{{ orderSearchData.id }}</td>
+              <td>{{ orderSearchData.order_date.split('T')[0] }}</td>
+              <td>{{ orderSearchData.shipping_date }}</td>
+              <td>{{ orderSearchData.payment_details.provider }}</td>
+              <td>{{ orderSearchData.status }}</td>
+              <td class="">{{ orderSearchData.shipping_address }}</td>
+              <td class="text-danger">{{ orderSearchData.payment_details.amount.toFixed(3) }} VND</td>
               <td>
-                <button @click="viewOrderDetails(order)"><i class="fa-solid fa-circle-info"></i></button>
+                <button @click="viewOrderDetails(orderSearchData)"><i class="fa-solid fa-circle-info"></i></button>
               </td>
             </tr>
           </tbody>
@@ -62,24 +95,17 @@
         <p><strong>Price shipment:</strong> <span>{{ selectedOrder.shipment?.price.toFixed(3) }} VND</span></p>
         <p class="border rounded p-3 mt-3"><strong>Total Amount:</strong> <span class="fw-bold text-danger">{{
           selectedOrder.payment_details.amount.toFixed(3) }} VND</span></p>
-        <!-- <p><strong>Cart Items:</strong></p>
+        <p><strong>Cart Items:</strong></p>
         <ul>
-          <li v-for="item in paginatedCartItems" :key="item.id">
-            <span><strong>Product:</strong> {{ item.order_details?.[0].product_name }}</span> |
-            <span><strong>Quantity:</strong> {{ item.order_details?.[0].number_of_products }}</span> |
-            <span><strong>Price:</strong> ${{ item.order_details?.[0].total_money }}</span>
+          <li v-for="item in selectedOrder.order_details" :key="item.product_id">
+            <div class="card my-2">
+              <span>{{ item.product_name }} <img :src="`http://localhost:8080/api/v1/products/images/${item.thumbnail}`"
+                  alt="Product Thumbnail" width="50"></span>
+              <span><strong>Quantity:</strong> {{ item.quantity }}</span>
+              <span><strong>Price:</strong> {{ item.price.toFixed(3) }} VND</span>
+            </div>
           </li>
-        </ul> -->
-        <!-- Pagination for cart items -->
-        <div class="pagination">
-          <button :disabled="currentCartPage === 1" @click="prevCartPage">
-            <i class="fa-solid fa-chevron-left"></i>
-          </button>
-          <span>{{ currentCartPage }}/{{ totalCartPages }}</span>
-          <button :disabled="currentCartPage === totalCartPages" @click="nextCartPage">
-            <i class="fa-solid fa-chevron-right"></i>
-          </button>
-        </div>
+        </ul>
       </div>
     </div>
   </div>
@@ -92,63 +118,17 @@ export default {
   data() {
     return {
       orderData: [],
+      orderSearchData: [],
       showOrderDetailsModal: false,
       selectedOrder: null,
       currentPage: 1,
       itemsPerPage: 3,
+      totalPages: 0,
       currentCartPage: 1,
       cartItemsPerPage: 3,
       sortDirection: '',
       searchQuery: '',
-      searchQueryYear: '',
-      selectedMonth: new Date().getMonth() + 1, // Default to current month
-      months: Array.from({ length: 12 }, (_, i) => i + 1), // Options from 1 to 12
     };
-  },
-  computed: {
-    totalPages() {
-      return Math.ceil(this.filteredOrders.length / this.itemsPerPage);
-    },
-    totalCartPages() {
-      if (!this.orderData || !Array.isArray(this.orderData)) return 0;
-      return Math.ceil(this.orderData.length / this.cartItemsPerPage);
-    },
-    paginatedCartItems() {
-      if (!this.orderData) return [];
-      const start = (this.currentCartPage - 1) * this.cartItemsPerPage;
-      return this.orderData.slice(start, start + this.cartItemsPerPage);
-    },
-    totalRevenue() {
-      // Get the entered year or fallback to the current year if empty
-      const currentYear = new Date().getFullYear();
-      const year = this.searchQueryYear ? parseInt(this.searchQueryYear, 10) : currentYear;
-
-      // Ensure the year is a valid number
-      if (isNaN(year)) {
-        return 0; // Return 0 if the year is invalid
-      }
-
-      // Filter orders by the selected month and specified year
-      return this.orderData
-        .filter(order => {
-          const orderDate = new Date(order.shipping_date.split('-').reverse().join('-'));
-          return (
-            orderDate.getFullYear() === year &&
-            orderDate.getMonth() + 1 === parseInt(this.selectedMonth, 10) // Ensure selectedMonth is parsed as an integer
-          );
-        })
-        .reduce((total, order) => total + parseFloat(order.totalAmount || 0), 0); // Safeguard against potential NaN values
-    },
-
-    filteredOrders() {
-      return this.orderData.filter(order =>
-        order.id.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    },
-    paginatedOrders() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      return this.filteredOrders.slice(start, start + this.itemsPerPage);
-    },
   },
   mounted() {
     this.fetchHistoryOrder();
@@ -156,19 +136,40 @@ export default {
   methods: {
     async fetchHistoryOrder() {
       try {
-        const response = await axios.get('http://localhost:8080/api/v1/orders?size=5&page=', {
+        const response = await axios.get(`http://localhost:8080/api/v1/orders?size=${this.itemsPerPage}&page=${this.currentPage - 1}`, {
           headers: {
             'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
             'Accept': '*/*'
           }
         });
         if (response.data.status === 200) {
-          this.orderData = response.data.data.orders
+          this.orderData = response.data.data.orders;
+          this.totalPages = response.data.data.total_pages;
         } else {
           console.log(response.data.message)
         }
       } catch (error) {
 
+      }
+    },
+    async searchOrderId() {
+      try {
+        if (this.searchQuery) {
+          const response = await axios.get(`http://localhost:8080/api/v1/orders/${this.searchQuery}`, {
+            headers: {
+              'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+            }
+          });
+          this.orderSearchData = response.data.data;
+          this.orderData = null;
+        }
+        else {
+          this.orderSearchData = null;
+          this.fetchHistoryOrder();
+        }
+      }
+      catch (error) {
+        console.log(error);
       }
     },
     closeModal() {
@@ -184,27 +185,16 @@ export default {
       console.log('Order deleted:', orderId);
     },
     prevPage() {
-      if (this.currentPage > 1) this.currentPage--;
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.fetchHistoryOrder();
+      }
     },
     nextPage() {
-      if (this.currentPage < this.totalPages) this.currentPage++;
-    },
-    prevCartPage() {
-      if (this.currentCartPage > 1) this.currentCartPage--;
-    },
-    nextCartPage() {
-      if (this.currentCartPage < this.totalCartPages) this.currentCartPage++;
-    },
-    sortDate(direction) {
-      this.sortDirection = direction;
-      this.orderData.sort((a, b) => {
-        const dateA = new Date(a.shipping_date.split('-').reverse().join('-'));
-        const dateB = new Date(b.shipping_date.split('-').reverse().join('-'));
-        return direction === 'asc' ? dateA - dateB : dateB - dateA;
-      });
-    },
-    calculateTotalRevenue() {
-      // Triggers the recalculation of `totalRevenue` based on selectedMonth
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.fetchHistoryOrder();
+      }
     },
   },
 };
@@ -213,6 +203,10 @@ export default {
 
 
 <style scoped>
+li {
+  list-style-type: none;
+}
+
 .container {
   margin: 20px auto;
   max-width: 1200px;
@@ -228,6 +222,7 @@ export default {
   color: #333;
   margin-bottom: 20px;
 }
+
 /* Card and Table */
 .card {
   background: #fff;
@@ -247,7 +242,7 @@ table {
 }
 
 thead th {
-  background-color: #007bff;
+  background-color: #343a40;
   color: #fff;
   text-align: left;
   padding: 10px;
@@ -278,7 +273,7 @@ tbody tr:nth-child(odd) {
 .pagination button {
   border: none;
   background-color: transparent;
-  color: #007bff;
+  color: #343a40;
   font-size: 1.5rem;
   cursor: pointer;
   margin: 0 10px;
@@ -336,6 +331,7 @@ tbody tr:nth-child(odd) {
   color: #007bff;
   transition: color 0.3s ease;
 }
+
 button {
   background-color: transparent;
   border: none;
@@ -347,7 +343,7 @@ button:hover {
 }
 
 .fa-circle-info {
-  color: #007bff;
+  color: #343a40;
 }
 
 .fa-circle-info:hover {

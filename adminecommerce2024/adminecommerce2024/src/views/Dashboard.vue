@@ -21,8 +21,15 @@
                 </div>
                 <div class="my-4">
                     <h2>Product Sales</h2>
-                    <p>Month <input type="number" name="month" v-model="selectedMonth" @change="fetchRevenueProduct"
-                            placeholder="Enter month" class=" my-3 rounded" /></p>
+                    <p>
+                        Month
+                        <select v-model="selectedMonth" @change="fetchRevenueProduct" class="my-3 rounded">
+                            <option v-for="month in 12" :key="month" :value="month">
+                                {{ month }}
+                            </option>
+                        </select>
+                    </p>
+
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -417,6 +424,7 @@ select {
     outline-style: none;
     padding: 10px;
 }
+
 .modal {
     position: fixed;
     top: 0;
@@ -462,5 +470,4 @@ select {
     margin: 10px 0;
     color: #495057;
 }
-
 </style>

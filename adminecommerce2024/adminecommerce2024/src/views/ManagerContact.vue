@@ -104,6 +104,7 @@ export default {
           }
         });
         this.contacts = this.contacts.filter((contact) => contact.id !== id);
+        this.fetchContacts();
       } catch (error) {
         console.error("Failed to delete contact:", error);
       }
