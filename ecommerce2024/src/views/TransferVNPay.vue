@@ -2,7 +2,8 @@
     <div class="container my-5">
         <div class="my-5">
             <h1>Payment VNPay</h1>
-            <p><span>Order: </span>{{ orderId }}</p>
+            <p>Order: <span class="fw-bold">{{ orderId }}</span></p>
+            <p>Shipping Date: <span>{{ shipping_date }}</span></p>
             <p><span>Amount: </span>{{ currencyFormat(amount) }} </p>
             <button @click="paymentVNPay" class="btn btn-primary">
                 Pay with VNPay
@@ -23,7 +24,8 @@ export default {
         return {
             orderId: null,
             amount: null,
-            loading: false
+            loading: false,
+            shipping_date: null,
         };
     },
     created() {
@@ -32,6 +34,7 @@ export default {
         if (orderTransfer) {
             this.orderId = orderTransfer.id;
             this.amount = orderTransfer.amount;
+            this.shipping_date = orderTransfer.shipping_date;
         } else {
             console.error("No order transfer data found.");
         }
@@ -40,6 +43,11 @@ export default {
         currencyFormat(value) {
             if (!value) return "0 VNĐ";
             return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+        },
+        formatDate(dateString) {
+            if (!dateString) return "";
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('vi-VN').format(date);
         },
         async paymentVNPay() {
             const orderTransfer = {

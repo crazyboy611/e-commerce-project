@@ -62,7 +62,8 @@ export default {
             id: '',
             role_id: '2',
             imageUrl: '',
-            no_password: '',
+            provider: '',
+
         };
     },
     computed: {
@@ -98,8 +99,7 @@ export default {
                     this.address = profileData.address;
                     this.profileImage = profileData.profile_image;
                     this.role_id = profileData.role_id;
-                    this.no_password = profileData.no_password;
-                    sessionStorage.setItem('no_password', this.no_password);
+                    this.provider = profileData.provider;
                     sessionStorage.setItem("id", this.id);
                 } else {
                     console.log(response.data.message);
@@ -140,15 +140,14 @@ export default {
         },
         async fetchProfileImage() {
             const accessToken = sessionStorage.getItem('accessToken');
-            const no_password = sessionStorage.getItem('no_password');
             if (!accessToken) {
                 console.error('Access token not found.');
                 return;
             }
-            if (no_password === false) {
+            if (this.provider == 'google') {
                 this.imageUrl = this.profileImage;
             }
-            else if (this.profileImage) {
+            else if (this.profileImage && this.provider== null) {
                 try {
                     const response = await axios.get(`http://localhost:8080/api/v1/users/profile_images/${this.profileImage}`, {
                         headers: {

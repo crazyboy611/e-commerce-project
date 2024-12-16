@@ -12,7 +12,8 @@
                             <span class="fw-bold">{{ shipment.type }}</span>
                             <p>{{ shipment.description }}</p>
                             <div>
-                                <small class="text-muted">Delivery by: {{ getShipments(shipment.estimated_day) }}</small>
+                                <small class="text-muted">Delivery by: {{ formatDate(getShipments(shipment.estimated_day))
+                                    }}</small>
                             </div>
                         </label>
                     </div>
@@ -69,6 +70,11 @@ export default {
             if (!value) return "0 VNĐ";
             return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
         },
+        formatDate(dateString) {
+            if (!dateString) return "";
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('vi-VN').format(date);
+        },
         getShipments(day) {
             const today = new Date();
             today.setDate(today.getDate() + day);
@@ -79,15 +85,15 @@ export default {
         },
         async fetchShipments() {
             try {
-                const response = await axios.get(`http://localhost:8080/api/v1/shipments`,{
+                const response = await axios.get(`http://localhost:8080/api/v1/shipments`, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
                     }
                 });
                 this.shipments = response.data.data;
             }
-            catch(error){
-                console.error('Error fetching shipments:', error);  
+            catch (error) {
+                console.error('Error fetching shipments:', error);
             }
         }
     },

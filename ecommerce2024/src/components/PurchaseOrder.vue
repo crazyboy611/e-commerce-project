@@ -29,8 +29,8 @@
           <div>
             <div>OrderID: <span class="fw-bold">{{ order.id }}</span></div>
             <div>
-              Order date: {{ order.order_date.split('T')[0] }} <br>
-              Shipment date: {{ order.shipping_date }}
+              Order date: {{ formatDate(order.order_date.split('T')[0]) }} <br>
+              Shipment date: {{ formatDate(order.shipping_date) }}
             </div>
             <div v-for="product in order.order_details" :key="product.id" class="product-item">
               <div class="d-flex align-items-center">
@@ -83,12 +83,12 @@
         <p><strong>Số điện thoại:</strong> {{ selectedOrder.receiver_phone_number }}</p>
         <p><strong>Email người mua:</strong> {{ selectedOrder.buyer_email }}</p>
         <p><strong>Ghi chú:</strong> {{ selectedOrder.note || 'Không có ghi chú' }}</p>
-        <p><strong>Ngày đặt hàng:</strong> {{ selectedOrder.order_date.split('T')[0] }}</p>
+        <p><strong>Ngày đặt hàng:</strong> {{ formatDate(selectedOrder.order_date.split('T')[0]) }}</p>
         <p><strong>Trạng thái:</strong> {{ selectedOrder.status }}</p>
         <p><strong>Tổng tiền:</strong> {{ currencyFormat(selectedOrder.payment_details.amount) }}</p>
         <p><strong>Phương thức vận chuyển:</strong> {{ selectedOrder.shipment.type }}</p>
         <p><strong>Địa chỉ nhận hàng:</strong> {{ selectedOrder.shipping_address }}</p>
-        <p><strong>Ngày giao hàng:</strong> {{ selectedOrder.shipping_date }}</p>
+        <p><strong>Ngày giao hàng:</strong> {{ formatDate(selectedOrder.shipping_date) }}</p>
         <p><strong>Phương thức thanh toán:</strong> {{ selectedOrder.payment_details.provider }}</p>
       </div>
     </div>
@@ -136,6 +136,11 @@ export default {
     currencyFormat(value) {
       if (!value) return "0 VNĐ";
       return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+    },
+    formatDate(dateString) {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('vi-VN').format(date);
     },
     async fetchOrders(status = 'all') {
       try {

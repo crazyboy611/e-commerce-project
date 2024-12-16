@@ -74,7 +74,7 @@
             <div class="row justify-content-center">
                 <div v-for="category in paginatedCategories" :key="category.name" class="col-md-4">
                     <RouterLink class="router-link-category" :to="{ name: 'ProductList' }">
-                        <div class="card text-center" @click="storeCategoryId(category.category_id)">
+                        <div class="card text-center" @click="storeCategoryId(category.id)">
                             <i :class="category.icon"></i>
                             <p>{{ category.name }}</p>
                         </div>
@@ -111,7 +111,7 @@
             </div>
         </div>
     </section>
-    <section class="section-5 my-4">
+    <!-- <section class="section-5 my-4">
         <div class="container">
             <h3 class="my-4">Popular Products</h3>
             <div id="carouselExample" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
@@ -148,7 +148,7 @@
                 </button>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <section class="section-6 my-5" id="home-view-discount">
         <div class="container">
@@ -158,7 +158,9 @@
                     :key="index">
                     <div class="card h-100 d-flex flex-column">
                         <div class="card-body d-flex flex-column">
-                            <i class="fas fa-heart text-end fs-5"></i>
+                            <router-link class="text-end"
+                                :to="{ name: 'ShoppingCartView', params: { product: JSON.stringify(product) } }"> <i
+                                    class="fa-solid fa-cart-shopping text-end fs-5"></i></router-link>
                             <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
                                 class="img-fluid card-img-top p-5" :alt="product.name">
                             <h3 class="card-title mb-2 text-center">{{ product.name }}</h3>
@@ -203,14 +205,13 @@ export default {
     },
     data() {
         return {
-            // Danh sách category
             categories: [
-                { name: 'Phone', icon: 'fas fa-mobile-alt fs-1', category_id: '1' },
-                { name: 'Camera', icon: 'fas fa-camera fs-1', category_id: '3' },
-                { name: 'Headphone', icon: 'fas fa-headphones-alt fs-1', category_id: '4' },
-                { name: 'Laptop', icon: 'fas fa-laptop fs-1', category_id: '2' },
-                { name: 'Computer', icon: 'fas fa-desktop fs-1', category_id: '5' },
-                { name: 'Accessories', icon: 'fa-regular fa-keyboard fs-1', category_id: '6' }
+                // { name: 'Phone', icon: 'fas fa-mobile-alt fs-1', category_id: '1' },
+                // { name: 'Camera', icon: 'fas fa-camera fs-1', category_id: '3' },
+                // { name: 'Headphone', icon: 'fas fa-headphones-alt fs-1', category_id: '4' },
+                // { name: 'Laptop', icon: 'fas fa-laptop fs-1', category_id: '2' },
+                // { name: 'Computer', icon: 'fas fa-desktop fs-1', category_id: '5' },
+                // { name: 'Accessories', icon: 'fa-regular fa-keyboard fs-1', category_id: '6' }
             ],
             newProducts: [
                 {
@@ -433,6 +434,7 @@ export default {
     },
     created() {
         this.fetchDiscoutProducts();
+        this.fetchCategory();
     },
     methods: {
         async fetchDiscoutProducts() {
@@ -465,11 +467,21 @@ export default {
         storeCategoryId(categoryId) {
             sessionStorage.setItem('selectedCategoryId', categoryId);
         },
+        async fetchCategory() {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/v1/categories`);
+                this.categories = response.data.data;
+            }
+            catch (error) {
+                console.error('Failed to fetch categories', error);
+            }
+        },
         purchaseProduct(product) {
             const checkoutData = {
                 id: product.id,
                 name: product.name,
-                quantity: 1, 
+                quantity: 1,
+                // quantityInStock: product.
                 price: product.price,
                 total: (product.price),
                 thumbnail: product.thumbnail
@@ -707,7 +719,10 @@ a {
     flex-direction: column;
     justify-content: space-between;
 }
-
+.section-6 a{
+    cursor: pointer;
+    color: rgb(228, 64, 64);
+}
 .section-6 .card .card-title,
 .section-6 .card .card-text {
     flex-grow: 1;

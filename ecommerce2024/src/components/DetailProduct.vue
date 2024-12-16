@@ -166,7 +166,7 @@
                         <div>
                             <div class="">
                                 <p class="fw-bold fs-4">{{ comment.user_full_name }}</p>
-                                <p class="text-secondary">{{ comment.created_at.split("T")[0] }}</p>
+                                <p class="text-secondary">{{ formatDate(comment.created_at.split("T")[0]) }}</p>
                             </div>
                             <p class="text-secondary">{{ comment.comment }}</p>
                         </div>
@@ -352,7 +352,7 @@
                         <div>
                             <div class="">
                                 <p class="fw-bold fs-4">{{ comment.user_full_name }}</p>
-                                <p class="text-secondary">{{ comment.created_at.split("T")[0] }}</p>
+                                <p class="text-secondary">{{ formatDate(comment.created_at.split("T")[0]) }}</p>
                             </div>
                             <p class="text-secondary">{{ comment.comment }}</p>
                         </div>
@@ -378,7 +378,9 @@
                     :key="index">
                     <div class="card h-100 d-flex flex-column">
                         <div class="card-body d-flex flex-column">
-                            <i class="fas fa-heart text-end fs-5"></i>
+                            <router-link class="text-end"
+                                :to="{ name: 'ShoppingCartView', params: { product: JSON.stringify(product) } }"> <i
+                                    class="fa-solid fa-cart-shopping text-end fs-5"></i></router-link>
                             <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
                                 class="img-fluid card-img-top p-5" :alt="product.name">
                             <h3 class="card-title mb-2 text-center">{{ product.name }}</h3>
@@ -448,6 +450,11 @@ export default {
             if (!value) return "0 VNĐ";
             return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
         },
+        formatDate(dateString) {
+            if (!dateString) return "";
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('vi-VN').format(date);
+        },
         async fetchProductDetails() {
             try {
                 const response = await axios.get(`http://localhost:8080/api/v1/products/details/${this.productId}`)
@@ -511,7 +518,7 @@ export default {
             this.rating = index + 1;
         },
         // Phương thức thay đổi giá trị hoverRating khi di chuột qua ngôi sao
-        handleHover(index) { 
+        handleHover(index) {
             this.hoverRating = index + 1;
         },
         // Phương thức reset lại hoverRating khi rời chuột khỏi ngôi sao
@@ -607,7 +614,7 @@ export default {
             const checkoutData = {
                 id: product.id,
                 name: product.name,
-                quantity: 1, 
+                quantity: 1,
                 price: product.price,
                 total: (product.price),
                 thumbnail: product.thumbnail

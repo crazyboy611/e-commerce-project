@@ -14,6 +14,7 @@
                 class="fa-solid fa-circle-check text-success"></i> {{ message }}</h2>
         <h2 v-else style="color: #b92c2c;"><i class="fa-solid fa-circle-xmark text-danger"></i> {{ message }}</h2>
         <p>{{ vnp_OrderInfo }}</p>
+        <p>Amount: {{ currencyFormat(vnp_Amount) }}</p>
         <p>Bank Code: {{ vnp_BankCode }}</p>
         <p>Card Type: {{ vnp_CardType }}</p>
         <p>Pay Date: {{ formattedPayDate }}</p>
@@ -32,19 +33,28 @@ export default {
             vnp_BankCode: '',
             vnp_CardType: '',
             vnp_PayDate: '',
-            vnp_TransactionStatus: ''
+            vnp_TransactionStatus: '',
+            vnp_Amount: '',
         };
     },
     computed: {
         formattedPayDate() {
-            // Format the pay date to yyyy/MM/dd
             if (this.vnp_PayDate) {
-                return `${this.vnp_PayDate.slice(0, 4)}/${this.vnp_PayDate.slice(4, 6)}/${this.vnp_PayDate.slice(6, 8)}`;
+                return this.formatDate(`${this.vnp_PayDate.slice(0, 4)}/${this.vnp_PayDate.slice(4, 6)}/${this.vnp_PayDate.slice(6, 8)}`);
             }
             return 'N/A';
         }
     },
     methods: {
+        formatDate(dateString) {
+            if (!dateString) return "";
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('vi-VN').format(date);
+        },
+        currencyFormat(value) {
+            if (!value) return "0 VNĐ";
+            return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+        },
         async updateStatusPayment() {
             try {
                 const orderTransferData = JSON.parse(sessionStorage.getItem('OrderTransfer'));
@@ -54,7 +64,7 @@ export default {
                 }
                 const orderId = orderTransferData.id;
                 const orderStatus = {
-                    order_id: orderId, // Use the extracted `id` here
+                    order_id: orderId,
                     status_code: this.vnp_TransactionStatus,
                     payment_type: 'vnpay'
                 };
@@ -81,6 +91,7 @@ export default {
         this.vnp_CardType = urlParams.get('vnp_CardType') || 'N/A';
         this.vnp_PayDate = urlParams.get('vnp_PayDate') || 'N/A';
         this.vnp_TransactionStatus = urlParams.get('vnp_TransactionStatus') || 'N/A';
+        this.vnp_Amount = urlParams.get('vnp_Amount') || 'N/A';
 
         const statusMessages = {
             '00': "Giao dịch thành công",

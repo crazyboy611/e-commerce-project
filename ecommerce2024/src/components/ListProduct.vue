@@ -29,7 +29,7 @@
           <div class="card-body d-flex flex-column">
             <router-link class="text-end"
               :to="{ name: 'ShoppingCartView', params: { product: JSON.stringify(product) } }"> <i
-                class="fa-solid fa-cart-shopping text-end fs-5" @click="addToCart(product.id)"></i></router-link>
+                class="fa-solid fa-cart-shopping text-end fs-5"></i></router-link>
             <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
               class="img-fluid card-img-top p-5" :alt="product.name">
             <h5 class="card-title mb-2 text-center">{{ product.name }}</h5>

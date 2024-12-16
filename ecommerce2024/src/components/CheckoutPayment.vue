@@ -77,6 +77,14 @@
                         </div>
                         <div class="d-flex justify-content-between">
                             <div class="me-4">
+                                <p class="fw-bold text-danger">Shipment Date:</p>
+                            </div>
+                            <div class="me-3">
+                                <p class="fw-bold">{{ formatDate(getShipments(selectedShipment.estimated_day)) }}</p>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <div class="me-4">
                                 <p>Subtotal:</p>
                                 <p v-if="isDiscountApplied" class="text-danger fw-bold">Discount</p>
                                 <p class="fs-4">Total:</p>
@@ -177,12 +185,22 @@ export default {
             if (!value) return "0 VNĐ";
             return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
         },
+        formatDate(dateString) {
+            if (!dateString) return "";
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('vi-VN').format(date);
+        },
+        getShipments(day) {
+            const today = new Date();
+            today.setDate(today.getDate() + day);
+            return today.toISOString().split('T')[0];
+        },
         increaseQuantity(item) {
             if (item.quantity < item.quantityInStock) {
                 item.quantity++;
                 this.updateSessionCart();
             }
-            else{
+            else {
                 alert("Not enough products");
             }
         },
@@ -292,6 +310,7 @@ export default {
                         const orderTransfer = {
                             id: response.data.data.id,
                             amount: response.data.data?.payment_details.amount,
+                            shipping_date: this.formatDate(response.data.data.shipping_date)
                         };
 
                         if (orderTransfer.id && orderTransfer.amount) {
