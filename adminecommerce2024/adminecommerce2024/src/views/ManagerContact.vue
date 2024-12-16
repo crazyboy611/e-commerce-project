@@ -25,7 +25,7 @@
               <td>{{ contact.fullName }}</td>
               <td>{{ contact.emailOrPhoneNumber }}</td>
               <td>{{ contact.content }}</td>
-              <td>{{ contact.createdAt.split('T')[0] }}</td>
+              <td>{{ formatDate(contact.createdAt.split('T')[0]) }}</td>
               <td>
                 <button class="btn btn-danger btn-sm" @click="deleteContact(contact.id)">
                   <i class="fa-solid fa-trash"></i>
@@ -78,6 +78,11 @@ export default {
     this.fetchContacts();
   },
   methods: {
+    formatDate(dateString) {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('vi-VN').format(date);
+    },
     async fetchContacts() {
       try {
         const response = await axios.get(`http://localhost:8080/api/v1/contact_us?size=${this.pageSize}&page=${this.currentPage}`, {

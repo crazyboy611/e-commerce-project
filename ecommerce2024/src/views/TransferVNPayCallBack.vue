@@ -40,7 +40,7 @@ export default {
     computed: {
         formattedPayDate() {
             if (this.vnp_PayDate) {
-                return this.formatDate(`${this.vnp_PayDate.slice(0, 4)}/${this.vnp_PayDate.slice(4, 6)}/${this.vnp_PayDate.slice(6, 8)}`);
+                return `${this.vnp_PayDate.slice(0, 4)}/${this.vnp_PayDate.slice(4, 6)}/${this.vnp_PayDate.slice(6, 8)}`;
             }
             return 'N/A';
         }

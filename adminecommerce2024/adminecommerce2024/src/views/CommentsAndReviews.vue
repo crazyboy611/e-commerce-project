@@ -35,7 +35,7 @@
                                 <td style="white-space: nowrap;">
                                     {{ comment.user_full_name }}
                                 </td>
-                                <td>{{ comment.created_at.split('T')[0] }}</td>
+                                <td>{{ formatDate(comment.created_at.split('T')[0]) }}</td>
                                 <td>{{ comment.rate }}</td>
                                 <td>
                                     <a href="#" @click.prevent="viewCommentDetails(comment)" class="text-break">
@@ -74,10 +74,10 @@
                 <div class="modal-content">
                     <span class="close fs-3 fw-bold" @click="closeProductModal">&times;</span>
                     <h2>Product Details</h2>
-                    <img :src="`http://localhost:8080/api/v1/products/images/${selectedProduct.image}`"
+                    <img :src="`http://localhost:8080/api/v1/products/images/${selectedProduct.thumbnail}`"
                         alt="Product Image" class="img-fluid mb-3" />
                     <p><strong>Product Name:</strong> {{ selectedProduct.name }}</p>
-                    <p><strong>Price:</strong> ${{ selectedProduct.price }}</p>
+                    <p><strong>Price:</strong> {{ currencyFormat(selectedProduct.price) }}</p>
                     <p><strong>Average Rating:</strong> {{ ratingAVG }}</p>
                 </div>
             </div>
@@ -109,9 +109,9 @@ export default {
 
     computed: {
         filteredComments() {
-              let sortedComments = [...this.comments];
+            let sortedComments = [...this.comments];
 
-            
+
 
             return sortedComments;
         },
@@ -128,6 +128,15 @@ export default {
         this.fetchComments();
     },
     methods: {
+        formatDate(dateString) {
+            if (!dateString) return "";
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('vi-VN').format(date);
+        },
+        currencyFormat(value) {
+            if (!value) return "0 VNĐ";
+            return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+        },
         viewUserDetails(user) {
             this.selectedUser = user;
             this.showUserDetailsModal = true;

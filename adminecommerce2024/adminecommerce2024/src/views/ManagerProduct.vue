@@ -28,9 +28,9 @@
               <tr v-for="(product, index) in products" :key="product.id">
                 <td>{{ product.id }}</td>
                 <td>{{ product.name }}</td>
-                <td>{{ product.price | currency }}</td>
-                <td>{{ product.created_at.split("T")[0] }}</td>
-                <td>{{ product.updated_at.split("T")[0] }}</td>
+                <td>{{ currencyFormat(product.price) }}</td>
+                <td>{{ formatDate(product.created_at.split("T")[0]) }}</td>
+                <td>{{ formatDate(product.updated_at.split("T")[0]) }}</td>
                 <td>
                   <span :class="{ 'badge bg-success': product.active, 'badge bg-danger': !product.active }">
                     {{ product.active ? 'Active' : 'Inactive' }}
@@ -287,6 +287,15 @@ export default {
     },
   },
   methods: {
+    currencyFormat(value) {
+      if (!value) return "0 VNĐ";
+      return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+    },
+    formatDate(dateString) {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('vi-VN').format(date);
+    },
     async fetchProducts() {
       const searchParam = this.searchQuery ? `&search=${this.searchQuery}` : '';
       try {

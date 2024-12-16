@@ -122,7 +122,7 @@ export default {
       showOrderDetailsModal: false,
       selectedOrder: null,
       currentPage: 1,
-      itemsPerPage: 3,
+      itemsPerPage: 10,
       totalPages: 0,
       currentCartPage: 1,
       cartItemsPerPage: 3,

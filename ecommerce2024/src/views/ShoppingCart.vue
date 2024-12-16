@@ -22,12 +22,12 @@ export default {
         ListShoppingCart,
     },
     props: {
-        product: String, // Accept the product passed as a JSON string via route
+        product: String, 
     },
     data() {
         return {
-            cartItems: [], // Initialize cartItems as an empty array
-            parsedProduct: null, // To store the parsed product
+            cartItems: [],
+            parsedProduct: null, 
         };
     },
     created() {

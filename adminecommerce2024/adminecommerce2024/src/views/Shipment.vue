@@ -27,19 +27,19 @@
             <td>{{ index + 1 }}</td>
             <td>{{ shipment.description }}</td>
             <td class="fw-bold">{{ shipment.type }}</td>
-            <td>{{ shipment.createdAt ? shipment.createdAt.split("T")[0] : 'N/A' }}</td>
+            <td>{{ shipment.createdAt ? formatDate(shipment.createdAt.split("T")[0]) : 'N/A' }}</td>
             <td class="text-center fw-bold">{{ shipment.estimated_day }}</td>
-            <td class="fw-bold">{{ shipment.price | currency }} <span class="text-danger me-1">VND</span></td>
+            <td class="fw-bold">{{ currencyFormat(shipment.price) }} <span class="text-danger me-1"></span></td>
             <td v-if="shipment.active == true" class="text-success fw-bold">{{ shipment.active }}</td>
             <td v-else class="text-danger fw-bold">{{ shipment.active }}</td>
-            <td>{{ shipment.updatedAt ? shipment.updatedAt.split("T")[0] : 'N/A' }}</td>
+            <td>{{ shipment.updatedAt ? formatDate(shipment.updatedAt.split("T")[0]) : 'N/A' }}</td>
             <td>
               <button class="edit-btn" @click="editShipment(shipment)">
                 <i class="fa-solid fa-edit"></i>
               </button>
             </td>
             <td>
-              <button v-if="shipment.active==false" class="btn-disabled" disabled>
+              <button v-if="shipment.active == false" class="btn-disabled" disabled>
                 <i class="fa-solid fa-trash"></i>
               </button>
               <button v-else class="delete-btn" @click="deleteShipment(shipment.id)">
@@ -152,14 +152,23 @@ export default {
     this.fetchShipments();
   },
   methods: {
+    currencyFormat(value) {
+      if (!value) return "0 VNĐ";
+      return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+    },
+    formatDate(dateString) {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('vi-VN').format(date);
+    },
     async fetchShipments() {
       try {
-        const response = await axios.get('http://localhost:8080/api/v1/shipments',{
+        const response = await axios.get('http://localhost:8080/api/v1/shipments', {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },
         });
-        this.shipments = response.data.data; 
+        this.shipments = response.data.data;
         this.shipmentForm = response.data.data;
       } catch (error) {
         console.error('Error fetching shipments:', error);
@@ -170,8 +179,8 @@ export default {
       this.clearForm();
     },
     async handleAddShipment() {
-      try{
-        const response = await axios.post(`http://localhost:8080/api/v1/shipments`,this.newShipment ,{
+      try {
+        const response = await axios.post(`http://localhost:8080/api/v1/shipments`, this.newShipment, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },
@@ -188,9 +197,9 @@ export default {
       this.showEditShipmentModal = true;
       this.shipmentForm = { ...shipment };
     },
-    async handleUpdateShipment(shipmentId){
-      try{
-        const response = axios.put(`http://localhost:8080/api/v1/shipments/${shipmentId}`,this.shipmentForm,{
+    async handleUpdateShipment(shipmentId) {
+      try {
+        const response = axios.put(`http://localhost:8080/api/v1/shipments/${shipmentId}`, this.shipmentForm, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },
@@ -207,8 +216,8 @@ export default {
       if (!confirm("Are you sure you want to delete?")) {
         return;
       }
-      try{
-        const response = await axios.delete(`http://localhost:8080/api/v1/shipments/${id}`,{
+      try {
+        const response = await axios.delete(`http://localhost:8080/api/v1/shipments/${id}`, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },
@@ -220,7 +229,7 @@ export default {
         console.error('Error deleting shipment:', error);
       }
     },
-    
+
     closeModal() {
       this.showAddShipmentModal = false;
       this.showEditShipmentModal = false;
@@ -431,14 +440,16 @@ tr:nth-child(even) {
     font-size: 1.2rem;
   }
 }
-.text-end button{
+
+.text-end button {
   background-color: #8abaee;
   color: white;
   font-weight: 500;
   border: none;
   outline-style: none;
 }
-.text-end button:hover{
+
+.text-end button:hover {
   background-color: #4e81df;
 }
 </style>

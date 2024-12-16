@@ -9,7 +9,7 @@
                         <p>Year <input type="number" name="year" v-model="selectedYear" @change="fetchRevenueData"
                                 placeholder="Enter Year" class=" mb-3 rounded" /></p>
                         <p>Total revennue year: <span class="text-danger fw-bold" v-if="totalRevenueYear">{{
-                            totalRevenueYear.toFixed(3) }} VND</span><span class="text-danger fw-bold" v-else>0
+                            currencyFormat(totalRevenueYear) }} </span><span class="text-danger fw-bold" v-else>0
                                 VND</span></p>
                     </div>
                     <v-card>
@@ -46,7 +46,7 @@
                                     </a>
                                 </td>
                                 <td>{{ product.quantity }}</td>
-                                <td><span class="text-danger fs-5">{{ product.revenue.toFixed(3) }} VND</span></td>
+                                <td><span class="text-danger fs-5">{{ currencyFormat(product.revenue) }} </span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -57,7 +57,7 @@
                             <img :src="`http://localhost:8080/api/v1/products/images/${detailProductSeller.thumbnail}`"
                                 alt="Product Image" class="img-fluid mb-3" />
                             <p><strong>Product Name:</strong> {{ detailProductSeller.name }}</p>
-                            <p><strong>Price:</strong> ${{ detailProductSeller.price }}</p>
+                            <p><strong>Price:</strong> {{ currencyFormat(detailProductSeller.price) }}</p>
                             <p>Quantity: {{ detailProductSeller.quantity }}</p>
                         </div>
                     </div>
@@ -222,6 +222,10 @@ export default {
         },
     },
     methods: {
+        currencyFormat(value) {
+            if (!value) return "0 VNĐ";
+            return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+        },
         async fetchRevenueData() {
             try {
                 const response = await axios.get(`http://localhost:8080/api/v1/statistics/monthly_revenue?year=${this.selectedYear}`, {
