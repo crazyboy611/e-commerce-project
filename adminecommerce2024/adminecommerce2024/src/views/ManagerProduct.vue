@@ -189,7 +189,7 @@
                 <!-- Is Hot -->
                 <div class="mb-3">
                   <label for="is_hot" class="form-label">Is Hot</label>
-                  <select class="form-select" v-model="productForm.is_hot">
+                  <select class="form-select" v-model="productForm.hot">
                     <option :value="true">Yes</option>
                     <option :value="false">No</option>
                   </select>
@@ -366,6 +366,7 @@ export default {
         });
         alert('Update product successfully');
         this.closeModal();
+        this.fetchProducts();
       } catch (error) {
         console.error('Failed to update product:', error);
       }
@@ -379,6 +380,7 @@ export default {
           },
         });
         alert('Delete product successfully');
+        this.fetchProducts();
       } catch (error) {
         console.error('Failed to delete product:', error);
       }
@@ -508,8 +510,6 @@ td {
   font-size: 20px;
   cursor: pointer;
 }
-
-.modal-body {}
 
 .form-label {
   font-weight: bold;

@@ -29,16 +29,20 @@
               <td>{{ order.shipping_date }}</td>
               <td>{{ order.payment_details.provider }}</td>
               <td>{{ order.status }}</td>
-              <!-- <td v-if="order.payment_details.paid == true" class="text-success fw-bold">{{ order.payment_details.paid
-                }}</td>
-              <td v-else class="text-danger fw-bold">{{ order.payment_details.paid }}</td> -->
               <td>{{ order.payment_details.paid }}</td>
               <td class="">{{ order.payment_details.amount.toFixed(3) }} VND</td>
               <td>
                 <button @click="viewOrderDetails(order)"><i class="fa-solid fa-circle-info"></i></button>
               </td>
               <td>
-                <button @click="editStatus(order)"><i class="fa-solid fa-pencil"></i></button>
+                <button @click="openStatusModal(order)" 
+                        v-if="(order.payment_details.provider === 'cash' || (order.payment_details.provider === 'vnpay' && order.payment_details.paid === true)) && order.status !== 'delivered' && order.status !== 'cancelled'">
+                  <i class="fa-solid fa-pencil"></i>  <!-- Biểu tượng chỉnh sửa -->
+                </button>
+                <button v-else>
+                  <i v-if="order.status === 'delivered'" class="fa-solid fa-check"></i>  <!-- Biểu tượng v -->
+                  <i v-else-if="order.status === 'cancelled'" class="fa-solid fa-times"></i> <!-- Biểu tượng x -->
+                </button>
               </td>
             </tr>
           </tbody>
@@ -108,6 +112,28 @@
         </ul>
       </div>
     </div>
+
+    <div v-if="showStatusModal" class="modal" @click.self="closeModal">
+      <div class="modal-content">
+        <span class="close" @click="closeModal">&times;</span>
+        <h2>Change Order Status</h2>
+        <form @submit.prevent="editStatus(selectedOrder.order_details?.[0].order_id)">
+          <div class="form-group">
+            <label for="status">Select Status:{{ selectedOrder.order_details?.[0].order_id }}</label>
+            <select id="status" v-model="newStatus" class="form-control">
+              <option value="pending">Pending</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="shipped">Shipped</option>
+              <option value="processing">Processing</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Update Status</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -120,6 +146,7 @@ export default {
       orderData: [],
       orderSearchData: [],
       showOrderDetailsModal: false,
+      showStatusModal: false,
       selectedOrder: null,
       currentPage: 1,
       itemsPerPage: 10,
@@ -174,12 +201,50 @@ export default {
     },
     closeModal() {
       this.showOrderDetailsModal = false;
+      this.showStatusModal = false;
       this.selectedOrder = null; // Reset selectedOrder when modal is closed
     },
     viewOrderDetails(order) {
       this.selectedOrder = order;
       this.showOrderDetailsModal = true;
     },
+    openStatusModal(order) {
+      this.showStatusModal = true;  
+      this.selectedOrder = order;  
+      this.newStatus = order.status; 
+    },
+    async editStatus(orderId) {
+      try {
+        console.log("Order ID:", orderId); 
+        console.log("New Status:", this.newStatus);
+        const response = await axios.put(`http://localhost:8080/api/v1/orders/update_status/${orderId}?status=${this.newStatus}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+            },
+          }
+        );
+        alert(response.data.message || "Order status updated successfully!");
+        this.closeModal();
+        // window.location.reload();
+        this.fetchHistoryOrder();
+      } catch (error) {
+        console.error("Failed to update order status:", error);
+
+        if (error.response) {
+          alert(
+            `Error ${error.response.status}: ${error.response.data.message || "Failed to update order status."}`
+          );
+        } else if (error.request) {
+          alert("No response from server. Please check your connection.");
+        } else {
+          alert("An error occurred: " + error.message);
+        }
+      }
+    },
+
+
     deleteOrder(orderId) {
       this.orderData = this.orderData.filter(order => order.id !== orderId);
       console.log('Order deleted:', orderId);
@@ -233,6 +298,10 @@ li {
 
 .table-responsive {
   margin-top: 10px;
+}
+.btn-primary{
+  background-color: #0d6efd;
+  color: white;
 }
 
 table {

@@ -78,27 +78,25 @@
             <div class="right-section">
                 <v-card>
                     <v-card-title class="fw-bold fs-3">Products Bestseller</v-card-title>
-                    <div class="text-end my-4">
-                        <!-- Sort by Select Dropdown -->
+                    <!-- <div class="text-end my-4">
                         <select v-model="sortOrder" @change="sortProducts" class="form-select mb-3">
                             <option value="asc">Ascending</option>
                             <option value="desc">Descending</option>
                         </select>
-                    </div>
+                    </div> -->
 
                     <v-card-text>
                         <div v-for="(productBestSeller, index) in sortedProducts" :key="index"
                             class="card my-2 py-3 px-3 history-card">
-                            <!-- Card Header with Toggle -->
-                            <div class="d-flex justify-content-between align-items-center"
-                                @click="toggleDetails(index)">
+                            <div class="text-center" @click="toggleDetails(index)">
                                 <p>{{ productBestSeller.name }}</p>
-                                <p><span class="text-danger fs-5">$</span>{{ productBestSeller.price }}</p>
+                                <img :src="`http://localhost:8080/api/v1/products/images/${productBestSeller.thumbnail}`"
+                                    alt="Product Image" class="img-fluid mb-3" />
                             </div>
 
-                            <!-- Expandable Details Section -->
                             <div v-if="expandedIndex === index" class="expandable-details">
-                                <p>Quantity Sold: {{ productBestSeller.quantity_sold }}</p>
+                                <p>Price: <span class="text-danger fs-5">{{ currencyFormat(productBestSeller.price) }}</span>
+                                </p>
                             </div>
                         </div>
                     </v-card-text>
@@ -176,38 +174,7 @@ export default {
                     data: [],
                 },
             ],
-            productBestSellers: [
-                {
-                    id: 1,
-                    name: "Iphone 13",
-                    price: 23,
-                    quantity_sold: 14
-                },
-                {
-                    id: 2,
-                    name: "Samsung Galaxy S24 Ultra",
-                    price: 23,
-                    quantity_sold: 12
-                },
-                {
-                    id: 3,
-                    name: "Iphone 15",
-                    price: 23,
-                    quantity_sold: 20
-                },
-                {
-                    id: 4,
-                    name: "Iphone 16",
-                    price: 23,
-                    quantity_sold: 33
-                },
-                {
-                    id: 5,
-                    name: "Lenovo",
-                    price: 100,
-                    quantity_sold: 25
-                }
-            ],
+            productBestSellers: [],
             sortOrder: 'asc',
             expandedIndex: null,
         };
@@ -278,6 +245,24 @@ export default {
                 this.fetchRevenueProduct();
             }
         },
+        async fetchDiscoutProducts() {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/v1/products?is_hot=true&page=0&size=10&sort_by=id&sort_dir=asc`);
+                if (response.data && response.data.status == 200) {
+                    const allProductDiscount = response.data.data.product_response;
+                    this.productBestSellers = this.getRandomDiscountProducts(allProductDiscount, 4);
+                }
+                else {
+                    console.error('Failed to fetch discount products');
+                }
+            }
+            catch (error) {
+                console.error('Failed to fetch discount products', error);
+            }
+        },
+        getRandomDiscountProducts(products, count) {
+            return products.map(product => ({ product, sort: Math.random() })).sort((a, b) => a.sort - b.sort).slice(0, count).map(({ product }) => product);
+        },
         async viewProductDetails(productId) {
             try {
                 const response = await axios.get(`http://localhost:8080/api/v1/products/details/${productId}`, {
@@ -303,6 +288,7 @@ export default {
         this.fetchRevenueData();
         this.fetchRevenueProduct();
         this.viewProductDetails();
+        this.fetchDiscoutProducts();
     },
 };
 </script>
