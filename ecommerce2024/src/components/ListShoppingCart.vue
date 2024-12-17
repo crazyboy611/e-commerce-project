@@ -1,4 +1,7 @@
 <template>
+  <div class="">
+    <p class="me-5">Total Items: {{ totalItems }}</p>
+  </div>
   <div class="d-flex justify-content-between flex-wrap my-5">
     <div class="my-5 list-cart">
       <div class="list-product list-group list-group-flush" v-for="(item, index) in cartItems" :key="index">
@@ -66,6 +69,11 @@ export default {
       }
       this.quantityInStock = item.quantityInStock;
     });
+  },
+  computed:{
+    totalItems(){
+      return this.cartItems.length;
+    }
   },
   methods: {
     currencyFormat(value) {

@@ -39,7 +39,8 @@
               <input type="checkbox" class="form-check-input" id="rememberMe" v-model="rememberMe" />
               <label class="form-check-label" for="rememberMe">Remember me</label>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <button v-if="disableButton==false" type="submit" class="btn btn-primary w-100">Login</button>
+            <button v-else type="submit" class="btn bg-danger w-100" disabled>Block Login</button>
           </form>
           <p class="text-center mt-3">
             Don't have an account? <router-link to="/Register">Sign up here</router-link>
@@ -81,13 +82,6 @@ export default {
       rememberMe: false,
     };
   },
-  mounted() {
-    const savedData = JSON.parse(localStorage.getItem('rememberedPassword'));
-    if (savedData && new Date(savedData.expiry) > new Date()) {
-      this.password = savedData.value;
-      this.rememberMe = true;
-    }
-  },
   methods: {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
@@ -112,20 +106,6 @@ export default {
     async login() {
       this.validateEmailOrPhone();
       this.validatePassword();
-      if (this.rememberMe) {
-        const expiryDate = new Date();
-        expiryDate.setMonth(expiryDate.getMonth() + 1);
-
-        localStorage.setItem(
-          'rememberedPassword',
-          JSON.stringify({
-            value: this.password,
-            expiry: expiryDate.toISOString(),
-          })
-        );
-      } else {
-        localStorage.removeItem('rememberedPassword');
-      }
       if (this.emailOrPhoneError || this.passwordError) return;
       try {
         const response = await axios.post('http://localhost:8080/api/v1/users/login', {
@@ -147,6 +127,7 @@ export default {
           alert("Login failed! Phone number, email, or password is incorrect.");
         }
         if (this.loginAttempts > 3) {
+          alert('')
           this.disableButton = true;
         }
       }

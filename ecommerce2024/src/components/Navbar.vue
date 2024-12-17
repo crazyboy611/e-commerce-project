@@ -115,17 +115,46 @@ export default {
         // Handle user logout
         logout() {
             sessionStorage.removeItem('accessToken'); // Remove user token from sessionStorage
-            sessionStorage.removeItem('fullName'); // Remove username from sessionStorage
+            sessionStorage.removeItem('fullName'); 
             sessionStorage.clear();
-            this.isAuthenticated = false; // Update authentication state
-            this.$router.push('/'); // Redirect to home after logout
+            this.isAuthenticated = false;
+            this.$router.push('/'); 
+        },
+        async checkToken() {
+            try {
+                const token = sessionStorage.getItem('accessToken');
+
+                const response = await axios.post(`http://localhost:8080/api/v1/users/introspect`, {
+                    token: token
+                });
+
+                if (!response.data.authenticated) {
+                    sessionStorage.removeItem('accessToken');
+                    sessionStorage.removeItem('fullName');
+                    sessionStorage.clear();
+                    alert('Session expired. Please log in again.');
+                    this.$router.push('/Login');
+                }
+            } catch (error) {
+                alert('An error occurred while validating your session. Please log in again.');
+                sessionStorage.clear();
+                this.$router.push('/Login');
+            }
+
+        },
+        startTokenCheckInterval() {
+            this.tokenCheckInterval = setInterval(() => {
+                this.checkToken();
+            }, 10 * 60 * 1000); // 10p
         }
     },
     watch: {
-        // Watch for route changes to update auth state
         $route() {
             this.checkAuthStatus();
         }
+    },
+    mounted() {
+        this.startTokenCheckInterval();
     }
 };
 </script>

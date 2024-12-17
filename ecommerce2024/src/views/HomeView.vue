@@ -83,16 +83,16 @@
             </div>
         </div>
     </section>
-    <section class="section-4">
+    <!-- <section class="section-4">
         <div class="container">
             <div class="mt-5">
-                <!-- Add @click methods to change the selectedCategory -->
+                
                 <a href="#" @click.prevent="filterProducts('newProduct')">New Products</a>
                 <a href="#" @click.prevent="filterProducts('bestSeller')">BestSeller</a>
                 <a href="#" @click.prevent="filterProducts('LimitedQuatity')">Limited Quantity</a>
             </div>
             <div class="row my-5">
-                <!-- Loop through filteredProducts instead of newProducts -->
+                
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3" v-for="(product, index) in filteredProducts"
                     :key="index">
                     <div class="card h-100 d-flex flex-column">
@@ -110,7 +110,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
     <!-- <section class="section-5 my-4">
         <div class="container">
             <h3 class="my-4">Popular Products</h3>
@@ -186,7 +186,9 @@
     <section class="section-7">
         <img src="../ImagePR/Banner2.png" width="100%" height="50%" alt="">
         <div class="content">
-            <button class="my-2 mt-3 text-center">Shop now</button>
+            <RouterLink to="/ProductList"> 
+                <button class="my-2 mt-3 text-center">Shop now</button>
+            </RouterLink>
         </div>
     </section>
     <ProductModal v-if="selectedProduct" :product="selectedProduct" @close="selectedProduct = null" />

@@ -130,32 +130,33 @@
                 </p>
             </div>
         </div>
-        <div class="reviews my-5">
+        <div class="reviews my-5" id="reviews-product">
             <div class="container mt-5">
-                <h1>Reviews</h1>
-                <div class="text-center review-section d-flex justify-content-evenly flex-wrap">
-                    <!-- Rating Display Section -->
-                    <div class="number-star text-center my-3">
-                        <h1 id="average-rating" class="average-rating">{{ averageRating }}</h1>
-                        <div id="static-stars" class="static-stars">
-                            <i v-for="i in 5" :key="i" class="fa-solid fa-star"
-                                :class="{ 'text-warning': i <= averageRating }"></i>
+                <div v-if="isReviewsProduct == 'true'">
+                    <h3>Reviews</h3>
+                    <div class="text-center review-section d-flex justify-content-evenly flex-wrap">
+                        <div class="number-star text-center my-3">
+                            <h1 id="average-rating" class="average-rating">{{ averageRating }}</h1>
+                            <div id="static-stars" class="static-stars">
+                                <i v-for="i in 5" :key="i" class="fa-solid fa-star"
+                                    :class="{ 'text-warning': i <= averageRating }"></i>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="comment-user">
-                        <p class="fs-4 text-secondary review-prompt">Leave comments and reviews for product</p>
-                        <div class="text-center">
-                            <form @submit.prevent="submitReview" class="review-form">
-                                <input type="text" placeholder="Comment" v-model="comment"
-                                    class="form-control comment-input">
-                                <div id="review-stars" class="review-stars my-4">
-                                    <i v-for="(star, index) in 5" :key="index" :class="getStarClass(index)"
-                                        @click="setRating(index)" @mouseover="handleHover(index)"
-                                        @mouseleave="resetHover"></i>
-                                </div>
-                                <button type="submit" class="btn btn-danger submit-btn">Submit Review</button>
-                            </form>
+                        <div class="comment-user">
+                            <p class="fs-4 text-secondary review-prompt">Leave comments and reviews for product</p>
+                            <div class="text-center">
+                                <form @submit.prevent="submitReview" class="review-form">
+                                    <input type="text" placeholder="Comment" v-model="comment"
+                                        class="form-control comment-input">
+                                    <div id="review-stars" class="review-stars my-4">
+                                        <i v-for="(star, index) in 5" :key="index" :class="getStarClass(index)"
+                                            @click="setRating(index)" @mouseover="handleHover(index)"
+                                            @mouseleave="resetHover"></i>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger submit-btn">Submit Review</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -315,33 +316,34 @@
                 </p>
             </div>
         </div>
-        <div class="reviews my-5">
+        <div class="reviews my-5" id="reviews-product">
             <div class="container mt-5">
-                <h1>Reviews</h1>
-                <div class="text-center review-section d-flex justify-content-evenly flex-wrap">
-                    <!-- Rating Display Section -->
-                    <div class="number-star text-center my-3">
-                        <h1 id="average-rating" class="average-rating">{{ averageRating }}</h1>
-                        <div id="static-stars" class="static-stars">
-                            <i v-for="i in 5" :key="i" class="fa-solid fa-star"
-                                :class="{ 'text-warning': i <= averageRating }"></i>
+                <div v-if="isReviewsProduct == true">
+                    <h3>Reviews</h3>
+                    <div class="text-center review-section d-flex justify-content-evenly flex-wrap">
+                        <div class="number-star text-center my-3">
+                            <h1 id="average-rating" class="average-rating">{{ averageRating }}</h1>
+                            <div id="static-stars" class="static-stars">
+                                <i v-for="i in 5" :key="i" class="fa-solid fa-star"
+                                    :class="{ 'text-warning': i <= averageRating }"></i>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Comment & Review Form Section -->
-                    <div class="comment-user">
-                        <p class="fs-4 text-secondary review-prompt">Leave comments and reviews for product</p>
-                        <div class="text-center">
-                            <form @submit.prevent="submitReview" class="review-form">
-                                <input type="text" placeholder="Comment" v-model="comment"
-                                    class="form-control comment-input">
-                                <div id="review-stars" class="review-stars my-4">
-                                    <i v-for="(star, index) in 5" :key="index" :class="getStarClass(index)"
-                                        @click="setRating(index)" @mouseover="handleHover(index)"
-                                        @mouseleave="resetHover"></i>
-                                </div>
-                                <button type="submit" class="btn btn-danger submit-btn">Submit Review</button>
-                            </form>
+                        <!-- Comment & Review Form Section -->
+                        <div class="comment-user">
+                            <p class="fs-4 text-secondary review-prompt">Leave comments and reviews for product</p>
+                            <div class="text-center">
+                                <form @submit.prevent="submitReview" class="review-form">
+                                    <input type="text" placeholder="Comment" v-model="comment"
+                                        class="form-control comment-input">
+                                    <div id="review-stars" class="review-stars my-4">
+                                        <i v-for="(star, index) in 5" :key="index" :class="getStarClass(index)"
+                                            @click="setRating(index)" @mouseover="handleHover(index)"
+                                            @mouseleave="resetHover"></i>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger submit-btn">Submit Review</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -436,6 +438,7 @@ export default {
             allComments: [],
             averageRating: 0.00,
             nameCategory: "",
+            isReviewsProduct: false,
         };
     },
     created() {
@@ -486,6 +489,11 @@ export default {
             catch (error) {
                 console.error('Failed to fetch discount products', error);
             }
+        },
+        loadReviewsProduct() {
+            this.isReviewsProduct = sessionStorage.getItem('reviewsProducts');
+            console.log(this.isReviewsProduct);
+            this.$router.push({ name: 'DetailProduct', hash: '#reviews-product' });
         },
         getRandomDiscountProducts(products, count) {
             return products.map(product => ({ product, sort: Math.random() })).sort((a, b) => a.sort - b.sort).slice(0, count).map(({ product }) => product);
@@ -562,7 +570,7 @@ export default {
                     alert("Review submitted successfully!");
                     this.comment = "";
                     this.rating = 0;
-                    // window.location.reload();
+                    sessionStorage.removeItem('reviewsProducts');
                     this.fetchReivewUser();
                 }
                 else {
@@ -583,8 +591,8 @@ export default {
         },
         addToCart(product) {
             const productToAdd = { ...product, color: this.selectedColor, memory: this.selectedMemory };
-            // Emit the product to the parent or cart component
             this.$emit('add-to-cart', productToAdd);
+            sessionStorage.removeItem('reviewsProducts');
         },
         selectImage(imageUrl) {
             this.parsedProduct.thumbnail = imageUrl;
@@ -606,8 +614,7 @@ export default {
 
             // Store it in sessionStorage as a stringified array
             sessionStorage.setItem('checkProductCart', JSON.stringify(checkoutData));
-
-            // Navigate to the checkout page
+            sessionStorage.removeItem('reviewsProducts');
             this.$router.push({ name: 'Checkout' });
         },
         purchaseProductDiscount(product) {
@@ -621,7 +628,7 @@ export default {
             };
 
             sessionStorage.setItem('checkProductCart', JSON.stringify([checkoutData]));
-
+            sessionStorage.removeItem('reviewsProducts');
             this.$router.push({ name: 'Checkout', params: { product: JSON.stringify(checkoutData) } });
         },
         async fetchReivewUser() {
@@ -667,6 +674,7 @@ export default {
         this.fetchDiscoutProducts();
         this.fetchReivewUser();
         this.fetchAveragedReviews();
+        this.loadReviewsProduct();
     },
 }
 

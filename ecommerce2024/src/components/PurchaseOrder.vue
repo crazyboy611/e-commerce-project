@@ -27,7 +27,7 @@
         <hr>
         <div class="product-list d-flex justify-content-between">
           <div>
-            <div>OrderID: <span class="fw-bold">{{ order.id }}</span></div>
+            <div @click="showOrderDetails(order)" style="cursor: pointer;"><span><i class="fa-solid fa-circle-info fs-5 me-2"></i></span>OrderID: <span class="fw-bold">{{ order.id }}</span></div>
             <div>
               Order date: {{ formatDate(order.order_date.split('T')[0]) }} <br>
               Shipment date: {{ formatDate(order.shipping_date) }}
@@ -35,8 +35,8 @@
             <div v-for="product in order.order_details" :key="product.id" class="product-item">
               <div class="d-flex align-items-center">
                 <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
-                  :alt="product.product_name" @click="showOrderDetails(order)" />
-                <div class="order-details" @click="showOrderDetails(order)">
+                  :alt="product.product_name" />
+                <div class="order-details">
                   <div class="product-name">{{ product.product_name }}</div>
                   <div class="product-quantity">Số lượng: {{ product.quantity }}</div>
                   <div class="product-price">Giá: {{ currencyFormat(product.price) }}</div>
@@ -44,7 +44,7 @@
               </div>
               <div v-if="order.status === 'delivered' && order.payment_details.paid == true">
                 <router-link :to="{ name: 'DetailProduct', params: { product: product.product_id } }">
-                  <button class="review-button">
+                  <button class="review-button" @click="displayReviews">
                     Đánh giá
                   </button>
                 </router-link>
@@ -54,7 +54,7 @@
           <div>
             <div class="order-total">Tổng đơn hàng: {{ currencyFormat(order.payment_details.amount) }}</div>
             <div>
-              <button v-if="order.status === 'shipped'" class="received-button" @click="markAsReceived(order)">
+              <button v-if="order.status === 'shipped' && order.payment_details.paid ==true" class="received-button" @click="markAsReceived(order)">
                 Đã nhận được hàng
               </button><br>
               <button v-if="order.status === 'pending'" class="buy-again-button" @click="markCancelled(order)">
@@ -90,6 +90,8 @@
         <p><strong>Địa chỉ nhận hàng:</strong> {{ selectedOrder.shipping_address }}</p>
         <p><strong>Ngày giao hàng:</strong> {{ formatDate(selectedOrder.shipping_date) }}</p>
         <p><strong>Phương thức thanh toán:</strong> {{ selectedOrder.payment_details.provider }}</p>
+        <p v-if="selectedOrder.payment_details.paid == false" class="text-danger">Chưa thanh toán đơn hàng</p>
+        <p v-else class="text-success">Đã thanh toán đơn hàng</p>
       </div>
     </div>
 
@@ -291,6 +293,9 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    displayReviews() {
+      sessionStorage.setItem('reviewsProducts', true);
     }
   },
   mounted() {
@@ -307,9 +312,6 @@ export default {
   margin: auto;
 }
 
-img {
-  cursor: pointer;
-}
 
 .tabs {
   display: flex;
@@ -359,7 +361,6 @@ img {
 }
 
 .order-details {
-  cursor: pointer;
   display: flex;
   flex-direction: column;
   /* Đặt hướng của các phần tử trong order-details thành cột */
