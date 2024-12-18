@@ -11,7 +11,7 @@
       </div>
       <div class="tab" :class="{ active: activeTab === 'shipped' }" @click="filterOrders('shipped')">Đang giao
         hàng</div>
-      <div class="tab" :class="{ active: activeTab === 'delivered ' }" @click="filterOrders('delivered')">Đã nhận hàng
+      <div class="tab" :class="{ active: activeTab === 'delivered' }" @click="filterOrders('delivered')">Đã nhận hàng
       </div>
       <div class="tab" :class="{ active: activeTab === 'cancelled' }" @click="filterOrders('cancelled')">Đã hủy</div>
     </div>

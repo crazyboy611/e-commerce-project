@@ -8,7 +8,7 @@
                 </RouterLink>
             </div>
             <!-- Pass cartItems as prop to ListShoppingCart -->
-            <ListShoppingCart :cartItems="cartItems" @update-cart="updateCart" />
+            <ListShoppingCart :cartItems="cartItems" @update-cart="updateCart" @update-total-items="updateTotalItems" />
         </div>
     </div>
 </template>
@@ -22,12 +22,12 @@ export default {
         ListShoppingCart,
     },
     props: {
-        product: String, 
+        product: String,
     },
     data() {
         return {
             cartItems: [],
-            parsedProduct: null, 
+            parsedProduct: null,
         };
     },
     created() {
@@ -71,11 +71,15 @@ export default {
     },
     methods: {
         updateCart(updatedItems) {
-            // Update cartItems in the parent component with the emitted data
+
             this.cartItems = updatedItems;
-            // Emit event if necessary to notify further parent components (if any)
+
             this.$emit('update-cart', updatedItems);
         },
+        updateTotalItems(total) {
+            this.totalItems = total;
+            this.$emit("update-total-items", total); 
+        }
     }
 }
 </script>

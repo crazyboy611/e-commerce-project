@@ -1,6 +1,7 @@
 <template>
     <div class="container-fuild">
-        <navbar />
+        <navbar :totalItems="totalItems" />
+        <router-view @update-total-items="updateTotalItems" />
     </div>
     <div class="container-fuild">
         <FooterPage />
@@ -14,37 +15,15 @@ export default {
         navbar,
         FooterPage
     },
-    methods: {
-        async checkToken() {
-            try {
-                const token = sessionStorage.getItem('accessToken');
-                if (!token) {
-                    alert('You are not logged in. Redirecting to login page...');
-                    this.$router.push('/Login');
-                    return;
-                }
-
-                const response = await axios.post(`http://localhost:8080/api/v1/users/introspect`, {
-                    token: token
-                });
-
-                if (!response.data.authenticated) {
-                    sessionStorage.removeItem('accessToken');
-                    sessionStorage.removeItem('fullName');
-                    sessionStorage.clear();
-                    alert('Session expired. Please log in again.');
-                    this.$router.push('/Login');
-                }
-            } catch (error) {
-                console.error('Error during token validation:', error);
-                alert('An error occurred while validating your session. Please log in again.');
-                sessionStorage.clear();
-                this.$router.push('/Login');
-            }
-        }
+    data() {
+        return {
+            totalItems: 0
+        };
     },
-    beforeMount() {
-        this.checkToken();
+    methods: {
+        updateTotalItems(total) {
+            this.totalItems = total;
+        }
     }
 }
 </script>

@@ -46,11 +46,15 @@
                                     </div>
                                     <div class="me-5">
                                         <ul class="navbar-nav pe-3">
-                                            <li class="nav-item">
-                                                <a class="nav-link" href="#">
-                                                    <router-link to="/ShoppingCartView/:product"><i
-                                                            class="fa-solid fa-cart-shopping"></i></router-link>
-                                                </a>
+                                            <li class="nav-item position-relative">
+                                                <router-link to="/ShoppingCartView/:product" class="nav-link">
+                                                    <i class="fa-solid fa-cart-shopping"></i>
+                                                    <span v-if="totalItems && totalItems >= 0"
+                                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                        {{ totalItems }}
+                                                        <span class="visually-hidden">items in cart</span>
+                                                    </span>
+                                                </router-link>
                                             </li>
                                             <li class="nav-item dropdown" v-if="!isAuthenticated">
                                                 <a class="nav-link dropdown-toggle" href="#" role="button"
@@ -92,11 +96,16 @@
             </nav>
         </div>
     </div>
-    <router-view />
 </template>
 <script>
 export default {
     name: 'Navbar',
+    props: {
+        totalItems: {
+            type: Number,
+            default: 0
+        }
+    },
     data() {
         return {
             isAuthenticated: false,
@@ -107,45 +116,45 @@ export default {
         this.checkAuthStatus();
     },
     methods: {
-        // Check if the user is authenticated
         checkAuthStatus() {
-            this.isAuthenticated = !!sessionStorage.getItem('accessToken'); // Check if session token exists
-            this.username = sessionStorage.getItem('fullName'); // Retrieve username from sessionStorage
+            this.isAuthenticated = !!sessionStorage.getItem('accessToken');
+            this.username = sessionStorage.getItem('fullName');
         },
-        // Handle user logout
+
         logout() {
-            sessionStorage.removeItem('accessToken'); // Remove user token from sessionStorage
-            sessionStorage.removeItem('fullName'); 
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('fullName');
             sessionStorage.clear();
             this.isAuthenticated = false;
-            this.$router.push('/'); 
+            this.$router.push('/');
         },
         async checkToken() {
-            try {
-                const token = sessionStorage.getItem('accessToken');
+            if (sessionStorage.getItem('accessToken')) {
+                try {
+                    const token = sessionStorage.getItem('accessToken');
 
-                const response = await axios.post(`http://localhost:8080/api/v1/users/introspect`, {
-                    token: token
-                });
+                    const response = await axios.post(`http://localhost:8080/api/v1/users/introspect`, {
+                        token: token
+                    });
 
-                if (!response.data.authenticated) {
-                    sessionStorage.removeItem('accessToken');
-                    sessionStorage.removeItem('fullName');
+                    if (!response.data.authenticated) {
+                        sessionStorage.removeItem('accessToken');
+                        sessionStorage.removeItem('fullName');
+                        sessionStorage.clear();
+                        alert('Session expired. Please log in again.');
+                        this.$router.push('/Login');
+                    }
+                } catch (error) {
                     sessionStorage.clear();
-                    alert('Session expired. Please log in again.');
                     this.$router.push('/Login');
                 }
-            } catch (error) {
-                alert('An error occurred while validating your session. Please log in again.');
-                sessionStorage.clear();
-                this.$router.push('/Login');
             }
 
         },
         startTokenCheckInterval() {
             this.tokenCheckInterval = setInterval(() => {
                 this.checkToken();
-            }, 10 * 60 * 1000); // 10p
+            }, 10 * 60 * 1000); 
         }
     },
     watch: {

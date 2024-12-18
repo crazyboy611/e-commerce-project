@@ -133,7 +133,15 @@ export default {
       sessionStorage.setItem('checkProductCart', JSON.stringify(checkoutData));
       this.$router.push({ name: 'Checkout' });
     },
-  }
+  },
+  watch: {
+    cartItems: {
+      deep: true,
+      handler() {
+        this.$emit("update-total-items", this.totalItems);
+      }
+    }
+  },
 }
 </script>
 
