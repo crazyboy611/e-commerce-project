@@ -54,6 +54,11 @@
                                                         {{ totalItems }}
                                                         <span class="visually-hidden">items in cart</span>
                                                     </span>
+                                                    <span v-if="totalItems && totalItems > 5"
+                                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                        5+
+                                                        <span class="visually-hidden">items in cart</span>
+                                                    </span>
                                                 </router-link>
                                             </li>
                                             <li class="nav-item dropdown" v-if="!isAuthenticated">

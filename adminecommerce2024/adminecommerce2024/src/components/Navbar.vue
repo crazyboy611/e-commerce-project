@@ -208,14 +208,20 @@ export default {
                     iconClass: "fa-solid fa-user me-2",
                     subItems: null
                 },
+                // {
+                //     name: "Order",
+                //     iconClass: "fa-solid fa-receipt me-2",
+                //     isDropdownOpen: false,
+                //     subItems: [
+                //         { name: "History Orders", link: "/HistoryOrder" },
+                //         { name: "Manage Order Status", link: "/HistoryOrderUser" }
+                //     ]
+                // },
                 {
                     name: "Order",
+                    link: "/HistoryOrder",
                     iconClass: "fa-solid fa-receipt me-2",
-                    isDropdownOpen: false,
-                    subItems: [
-                        { name: "History Orders", link: "/HistoryOrder" },
-                        { name: "Manage Order Status", link: "/HistoryOrderUser" }
-                    ]
+                    subItems: null
                 },
                 {
                     name: "Comments And Reviews",
@@ -223,12 +229,12 @@ export default {
                     iconClass: "fa-solid fa-star me-2",
                     subItems: null
                 },
-                {
-                    name: "Discount Code",
-                    link: "/ManagerDiscountCode",
-                    iconClass: "fa-solid fa-hand-holding-dollar me-2",
-                    subItems: null
-                },
+                // {
+                //     name: "Discount Code",
+                //     link: "/ManagerDiscountCode",
+                //     iconClass: "fa-solid fa-hand-holding-dollar me-2",
+                //     subItems: null
+                // },
                 
                 {
                     name: "Manager Contact",

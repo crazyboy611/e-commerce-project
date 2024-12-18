@@ -25,22 +25,22 @@
             <tr v-for="(order, index) in orderData" :key="order.id"
               :class="{ 'bg-danger': order.status == 'cancelled', 'bg-success': order.status == 'delivered' }">
               <td>{{ order.id }}</td>
-              <td>{{ order.order_date.split('T')[0] }}</td>
-              <td>{{ order.shipping_date }}</td>
+              <td>{{ formatDate(order.order_date.split('T')[0]) }}</td>
+              <td>{{ formatDate(order.shipping_date) }}</td>
               <td>{{ order.payment_details.provider }}</td>
               <td>{{ order.status }}</td>
               <td>{{ order.payment_details.paid }}</td>
-              <td class="">{{ order.payment_details.amount.toFixed(3) }} VND</td>
+              <td class="">{{ currencyFormat(order.payment_details.amount) }}</td>
               <td>
                 <button @click="viewOrderDetails(order)"><i class="fa-solid fa-circle-info"></i></button>
               </td>
               <td>
-                <button @click="openStatusModal(order)" 
-                        v-if="(order.payment_details.provider === 'cash' || (order.payment_details.provider === 'vnpay' && order.payment_details.paid === true)) && order.status !== 'delivered' && order.status !== 'cancelled'">
-                  <i class="fa-solid fa-pencil"></i>  <!-- Biểu tượng chỉnh sửa -->
+                <button @click="openStatusModal(order)"
+                  v-if="(order.payment_details.provider === 'cash' || (order.payment_details.provider === 'vnpay' && order.payment_details.paid === true)) && order.status !== 'delivered' && order.status !== 'cancelled'">
+                  <i class="fa-solid fa-pencil"></i> <!-- Biểu tượng chỉnh sửa -->
                 </button>
                 <button v-else>
-                  <i v-if="order.status === 'delivered'" class="fa-solid fa-check"></i>  <!-- Biểu tượng v -->
+                  <i v-if="order.status === 'delivered'" class="fa-solid fa-check"></i> <!-- Biểu tượng v -->
                   <i v-else-if="order.status === 'cancelled'" class="fa-solid fa-times"></i> <!-- Biểu tượng x -->
                 </button>
               </td>
@@ -63,12 +63,12 @@
           <tbody>
             <tr>
               <td>{{ orderSearchData.id }}</td>
-              <td>{{ orderSearchData.order_date.split('T')[0] }}</td>
-              <td>{{ orderSearchData.shipping_date }}</td>
+              <td>{{ formatDate(orderSearchData.order_date.split('T')[0]) }}</td>
+              <td>{{ formatDate(orderSearchData.shipping_date) }}</td>
               <td>{{ orderSearchData.payment_details.provider }}</td>
               <td>{{ orderSearchData.status }}</td>
               <td class="">{{ orderSearchData.shipping_address }}</td>
-              <td class="text-danger">{{ orderSearchData.payment_details.amount.toFixed(3) }} VND</td>
+              <td class="text-danger">{{ currencyFormat(orderSearchData.payment_details.amount) }}</td>
               <td>
                 <button @click="viewOrderDetails(orderSearchData)"><i class="fa-solid fa-circle-info"></i></button>
               </td>
@@ -96,9 +96,9 @@
         <p><strong>Shipment method:</strong> {{ selectedOrder.shipment.type }}</p>
         <p><strong>Discount Code:</strong> {{ 'null' }}</p>
         <p><strong>Address:</strong> {{ selectedOrder.shipping_address }}</p>
-        <p><strong>Price shipment:</strong> <span>{{ selectedOrder.shipment?.price.toFixed(3) }} VND</span></p>
+        <p><strong>Price shipment:</strong> <span>{{ currencyFormat(selectedOrder.shipment?.price) }}</span></p>
         <p class="border rounded p-3 mt-3"><strong>Total Amount:</strong> <span class="fw-bold text-danger">{{
-          selectedOrder.payment_details.amount.toFixed(3) }} VND</span></p>
+          currencyFormat(selectedOrder.payment_details.amount) }}</span></p>
         <p><strong>Cart Items:</strong></p>
         <ul>
           <li v-for="item in selectedOrder.order_details" :key="item.product_id">
@@ -106,7 +106,7 @@
               <span>{{ item.product_name }} <img :src="`http://localhost:8080/api/v1/products/images/${item.thumbnail}`"
                   alt="Product Thumbnail" width="50"></span>
               <span><strong>Quantity:</strong> {{ item.quantity }}</span>
-              <span><strong>Price:</strong> {{ item.price.toFixed(3) }} VND</span>
+              <span><strong>Price:</strong> {{ currencyFormat(item.price) }}</span>
             </div>
           </li>
         </ul>
@@ -161,6 +161,15 @@ export default {
     this.fetchHistoryOrder();
   },
   methods: {
+    currencyFormat(value) {
+      if (!value) return "0 VNĐ";
+      return new Intl.NumberFormat('vi-VN').format(value) + " VNĐ";
+    },
+    formatDate(dateString) {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('vi-VN').format(date);
+    },
     async fetchHistoryOrder() {
       try {
         const response = await axios.get(`http://localhost:8080/api/v1/orders?size=${this.itemsPerPage}&page=${this.currentPage - 1}`, {
@@ -209,13 +218,13 @@ export default {
       this.showOrderDetailsModal = true;
     },
     openStatusModal(order) {
-      this.showStatusModal = true;  
-      this.selectedOrder = order;  
-      this.newStatus = order.status; 
+      this.showStatusModal = true;
+      this.selectedOrder = order;
+      this.newStatus = order.status;
     },
     async editStatus(orderId) {
       try {
-        console.log("Order ID:", orderId); 
+        console.log("Order ID:", orderId);
         console.log("New Status:", this.newStatus);
         const response = await axios.put(`http://localhost:8080/api/v1/orders/update_status/${orderId}?status=${this.newStatus}`,
           {},
@@ -299,7 +308,8 @@ li {
 .table-responsive {
   margin-top: 10px;
 }
-.btn-primary{
+
+.btn-primary {
   background-color: #0d6efd;
   color: white;
 }

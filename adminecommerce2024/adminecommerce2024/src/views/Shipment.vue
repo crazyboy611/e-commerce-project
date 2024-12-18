@@ -163,7 +163,7 @@ export default {
     },
     async fetchShipments() {
       try {
-        const response = await axios.get('http://localhost:8080/api/v1/shipments', {
+        const response = await axios.get('http://localhost:8080/api/v1/shipments/admin', {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },

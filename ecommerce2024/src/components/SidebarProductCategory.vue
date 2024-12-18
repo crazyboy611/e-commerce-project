@@ -5,13 +5,21 @@
     <!-- RAM Selection -->
     <div class="my-3">
       <div>
-        <div class="dropdown mt-2">
+        <div class="mt-5">
+          <label for="" class="form-label">
+            RAM: <span class="text-danger fs-5 ms-3">{{ selectedRam }} GB</span>
+          </label>
+          <input type="range" class="form-range" id="" v-model="selectedRam" min="1" max="1000"
+            @input="toggleRam" />
+        </div>
+        <!-- <div class="dropdown mt-2">
           <a class="dropdown-toggle text-secondary" data-bs-toggle="collapse" :data-bs-target="'#ramCollapse'"
             aria-controls="ramCollapse" aria-expanded="false">
             RAM
           </a>
-        </div>
-        <div class="collapse mx-2" :id="'ramCollapse'">
+        </div> -->
+
+        <!-- <div class="collapse mx-2" :id="'ramCollapse'">
           <ul class="list-group list-group-flush mt-3">
             <li class="list-group-item d-flex">
               <input type="radio" id="ram4" name="ram" v-model="selectedRam" value="1" @click="toggleRam('1')" />
@@ -26,12 +34,19 @@
               <label class="ms-2" for="ram8">3GB</label>
             </li>
           </ul>
-        </div>
+        </div> -->
       </div>
     </div>
     <div class="my-3">
       <div>
-        <div class="dropdown mt-2">
+        <div class="mt-5">
+          <label for="" class="form-label">
+            Storage: <span class="text-danger fs-5 ms-3">{{ selectedStorage }} GB</span>
+          </label>
+          <input type="range" class="form-range" id="" v-model="selectedStorage" min="1" max="1000"
+            @input="toggleStorage" />
+        </div>
+        <!-- <div class="dropdown mt-2">
           <a class="dropdown-toggle text-secondary" data-bs-toggle="collapse" :data-bs-target="'#storageCollapse'"
             aria-controls="storageCollapse" aria-expanded="false">
             Storage
@@ -55,7 +70,7 @@
               <label class="ms-2" for="storage256">248GB</label>
             </li>
           </ul>
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -77,8 +92,8 @@ export default {
   },
   data() {
     return {
-      selectedRam: null,
-      selectedStorage: null,
+      selectedRam: 0,
+      selectedStorage: 0,
       priceRange: 0,
     };
   },
@@ -90,12 +105,10 @@ export default {
     updatePriceRange() {
       this.$emit('price-change', this.priceRange);
     },
-    toggleRam(value) {
-      this.selectedRam = this.selectedRam === value ? null : value;
+    toggleRam() {
       this.$emit('updateRam', this.selectedRam);
     },
-    toggleStorage(value) {
-      this.selectedStorage = this.selectedStorage === value ? null : value;
+    toggleStorage() {
       this.$emit('updateStorage', this.selectedStorage);
     }
   }

@@ -102,6 +102,9 @@ export default {
         this.updateSessionStorage();
         this.$emit('update-cart', this.cartItems);
       }
+      else{
+        alert("Quantity is less than 1 item");
+      }
     },
     updateSessionStorage() {
       sessionStorage.setItem('cartProducts', JSON.stringify(this.cartItems));

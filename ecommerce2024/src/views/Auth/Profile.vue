@@ -115,27 +115,32 @@ export default {
             this.$refs.fileInput.click();
         },
         async onImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    const response = await axios.post('http://localhost:8080/api/v1/users/upload_profile_image', formData, {
-                        headers: {
-                            'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
-                            'Content-Type': 'multipart/form-data'
+            if (this.provider == null) {
+                const file = event.target.files[0];
+                if (file) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        const response = await axios.post('http://localhost:8080/api/v1/users/upload_profile_image', formData, {
+                            headers: {
+                                'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        });
+                        if (response.data.status === 201) {
+                            this.profileImage = response.data.data;
+                            alert('Profile image updated successfully!');
+                        } else {
+                            alert('Failed to update profile image: ' + response.data.message);
                         }
-                    });
-                    if (response.data.status === 201) {
-                        this.profileImage = response.data.data;
-                        alert('Profile image updated successfully!');
-                    } else {
-                        alert('Failed to update profile image: ' + response.data.message);
+                    } catch (error) {
+                        console.error('Error uploading profile image:', error);
+                        alert('An error occurred while uploading the profile image.');
                     }
-                } catch (error) {
-                    console.error('Error uploading profile image:', error);
-                    alert('An error occurred while uploading the profile image.');
                 }
+            }
+            else{
+                alert('Cannot update profile image with Google OAuth.');
             }
         },
         async fetchProfileImage() {
@@ -147,20 +152,20 @@ export default {
             if (this.provider == 'google') {
                 this.imageUrl = this.profileImage;
             }
-            else if (this.profileImage && this.provider== null) {
+            else if (this.profileImage && this.provider == null) {
                 try {
                     const response = await axios.get(`http://localhost:8080/api/v1/users/profile_images/${this.profileImage}`, {
                         headers: {
                             'Authorization': `Bearer ${accessToken}`,
                             'Accept': '*/*'
                         },
-                        responseType: 'blob' 
+                        responseType: 'blob'
                     });
 
                     this.imageUrl = URL.createObjectURL(response.data);
                 } catch (error) {
                     console.error('Error fetching profile image:', error);
-                    this.imageUrl = ''; 
+                    this.imageUrl = '';
                     if (error.response && error.response.status === 401) {
                         console.error('Unauthorized access - check if the token is valid or has expired.');
                     }

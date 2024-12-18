@@ -66,7 +66,7 @@
       </div>
 
 
-      <div v-if="showAddProductModal" class="showAdd">
+      <div v-if="showAddProductModal" class="showAdd modal-opacity">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header d-flex justify-content-between">
@@ -97,7 +97,7 @@
                 </div>
                 <div class="mb-3">
                   <label for="is_hot" class="form-label">Is Hot</label>
-                  <select class="form-select" v-model="newProduct.is_hot">
+                  <select class="form-select" v-model="newProduct.hot">
                     <option :value="true">Yes</option>
                     <option :value="false">No</option>
                   </select>
@@ -120,7 +120,13 @@
                 <div class="mb-3">
                   <label class="form-label">Attributes</label>
                   <div v-for="(attr, index) in productForm.product_attributes" :key="index" class="mb-2">
-                    <input type="text" v-model="attr.name" placeholder="Attribute Name" class="form-control mb-1">
+                    <!-- <input type="text" v-model="attr.name" placeholder="Attribute Name" class="form-control mb-1"> -->
+                    <select v-model="attr.name" class="form-select mb-1">
+                    <option value="" disabled>Select Attribute</option>
+                    <option v-for="attribute in attributeList" :key="attribute.attributeId" :value="attribute.name">
+                      {{ attribute.name }}
+                    </option>
+                  </select>
                     <input type="text" v-model="attr.value" placeholder="Attribute Value" class="form-control">
                   </div>
                   <button type="button" class="btn btn-primary btn-sm mt-2" @click="addAttribute">
@@ -136,6 +142,7 @@
           </div>
         </div>
       </div>
+
       <div v-if="showEditProductModal" class="showEdit">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -211,21 +218,66 @@
                   </select>
                 </div>
                 <!-- Attributes -->
-                <!-- <div class="mb-3">
+                <div class="mb-3">
                   <label class="form-label">Attributes</label>
                   <div v-for="(attr, index) in productForm.product_attributes" :key="index" class="mb-2">
-                    <input type="text" v-model="attr.name" placeholder="Attribute Name" class="form-control mb-1">
+                    <!-- <input type="text" v-model="attr.name" placeholder="Attribute Name" class="form-control mb-1"> -->
+                    <select v-model="attr.name" class="form-select mb-1">
+                    <option value="" disabled>Select Attribute</option>
+                    <option v-for="attribute in attributeList" :key="attribute.id" :value="attribute.name">
+                      {{ attribute.name }}
+                    </option>
+                  </select>
                     <input type="text" v-model="attr.value" placeholder="Attribute Value" class="form-control">
                   </div>
-                  <button type="button" class="btn btn-primary btn-sm mt-2" @click="addAttribute">
+                  <button type="button" class="btn btn-primary btn-sm m-2" @click="editAttribute(productForm.id)">
+                    detail
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm m-2" @click="addAttribute">
                     Add Attribute
                   </button>
-                </div> -->
+                </div>
                 <div class="text-end">
                   <button type="submit" class="btn btn-success">Update Product</button>
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showEditAttributeModal" class="modal modal-opacity fade show d-block">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header d-flex justify-content-between">
+            <h5 class="modal-title">Edit Attribute</h5>
+            <button class="btn btn-danger" @click="closeModal"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="updateAttribute(productForm.id)">
+              <div class="mb-3">
+                <label class="form-label">Attributes</label>
+                <div v-for="(attr, index) in attributeForm" :key="index" class="mb-2">
+                  <!-- <input type="text" v-model="attr.name" placeholder="Attribute Name" class="form-control mb-1"> -->
+                  <select v-model="attr.name" class="form-select mb-1">
+                    <option value="" disabled>Select Attribute</option>
+                    <option v-for="attribute in attributeList" :key="attribute.attributeId" :value="attribute.name">
+                      {{ attribute.name }}
+                    </option>
+                  </select>
+                  <input type="text" v-model="attr.value" placeholder="Attribute Value" class="form-control">
+                </div>
+                <button type="button" class="btn btn-primary btn-sm mt-2" @click="addAttributeindetail">
+                  Add Attribute
+                </button>
+              </div>
+              <div class="text-end">
+                <button type="submit" class="btn btn-success">
+                  Update Attribute
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -245,6 +297,7 @@ export default {
       products: [],
       showAddProductModal: false,
       showEditProductModal: false,
+      showEditAttributeModal: false,
       currentPage: 0,
       totalPages: 0,
       pageSize: 10,
@@ -258,7 +311,13 @@ export default {
         quantity: 0,
         is_hot: false,
         active: true,
-        product_attributes: [],
+        product_attributes: [
+          {
+            name:'',
+            value:''
+          }
+        ],
+        attributeList: [],
       },
       newProduct: {
         name: '',
@@ -269,13 +328,20 @@ export default {
         quantity: 0,
         is_hot: false,
         active: true,
-        product_attributes: [],
+        product_attributes: [
+          {
+            name:'',
+            value:''
+          }
+        ],
       },
+      attributeForm: [],
     };
   },
   created() {
     this.fetchProducts();
     this.fetchSubcategories();
+    this.getAttribute();
   },
   watch: {
     searchQuery: {
@@ -286,6 +352,9 @@ export default {
       immediate: true,
     },
   },
+  mounted() {
+  this.getAttribute();
+},
   methods: {
     currencyFormat(value) {
       if (!value) return "0 VNĐ";
@@ -299,7 +368,11 @@ export default {
     async fetchProducts() {
       const searchParam = this.searchQuery ? `&search=${this.searchQuery}` : '';
       try {
-        const response = await axios.get(`http://localhost:8080/api/v1/products?&size=${this.pageSize}&page=${this.currentPage}${searchParam}&sort_by=id&sort_dir=asc`);
+        const response = await axios.get(`http://localhost:8080/api/v1/products/admin?&size=${this.pageSize}&page=${this.currentPage}${searchParam}&sort_by=id&sort_dir=asc`,{
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+          },
+        });
         this.products = response.data.data.product_response;
         this.currentPage = response.data.data.page_no;
         this.pageSize = response.data.data.page_size;
@@ -325,25 +398,81 @@ export default {
         // console.log(this.productForm.thumbnail);
       }
     },
+    async getAttribute() {
+      try {
+        const response1 = await axios.get(`http://localhost:8080/api/v1/attributes?size=${this.pageSize}&page=${this.currentPage}`);
+        const totalelement = response1.data.data.totalElements;
+        const response = await axios.get(`http://localhost:8080/api/v1/attributes?size=${totalelement}&page=0`);
+        this.attributeList = response.data.data.content; // Trích xuất content từ data
+      } catch (error) {
+        console.error('Failed to fetch attributes:', error);
+        this.attributeList = []; // Gán danh sách rỗng nếu xảy ra lỗi
+      }
+    },
+    addAttributeindetail() {
+      this.attributeForm.push({ name: '', value: '' });
+    },
+    addAttribute() {
+      if (!this.productForm.product_attributes) {
+        this.productForm.product_attributes = [];
+      }
+      this.productForm.product_attributes.push({ name: '', value: '' });
+    },
+    async editAttribute(productID) {
+      this.closeModal();
+      this.showEditAttributeModal = true;
+      try {
+        const response = await axios.get(`http://localhost:8080/api/v1/products/details/${productID}`);
+        // Gán dữ liệu trả về từ API vào productForm
+        this.attributeForm = response.data.data.attributes;
+        console.log(this.attributeForm)
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+      }
+    },
+    async updateAttribute(productId) {
+      try {
+        console.log(this.productForm)
+        this.productForm = {
+          ...this.productForm,
+          product_attributes:this.attributeForm
+        }
+        console.log(this.productForm)
+
+        const response = await axios.put(`http://localhost:8080/api/v1/products/${productId}`, this.productForm, {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+          },
+        });
+        alert(response.data.message);
+        this.closeModal();
+        this.fetchProducts();
+      } catch (error) {
+        console.error('Failed to edit product:', error);
+      }
+    },
     addProduct() {
+      this.closeModal();
       this.showAddProductModal = true;
       this.clearForm();
     },
     async handleAddProduct() {
+      this.newProduct.product_attributes=this.productForm.product_attributes
       try {
         const response = await axios.post(`http://localhost:8080/api/v1/products`, this.newProduct, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },
         });
-        alert('Add product successfully');
-        window.location.reload();
+        alert(response.data.message);
+        this.fetchProducts();
       }
       catch (error) {
-        console.error('Failed to add product:', error);
+        alert(error.response.data.error);
       }
     },
     async editProduct(productId) {
+      this.closeModal();
       this.showEditProductModal = true;
       try {
         const response = await axios.get(`http://localhost:8080/api/v1/products/details/${productId}`);
@@ -351,7 +480,8 @@ export default {
         const subcategoryIds = product.subcategory.map(subcat => subcat.id);
         this.productForm = {
           ...product,
-          subcategory: subcategoryIds
+          subcategory: subcategoryIds,
+          // product_attributes:product.attributes
         };
       } catch (error) {
         console.error('Failed to edit product:', error);
@@ -359,12 +489,20 @@ export default {
     },
     async handleUpdateProduct(productId) {
       try {
+        console.log(this.productForm)
+
+        this.productForm = {
+          ...this.productForm,
+          is_hot:this.productForm.hot
+        }
+        console.log(this.productForm)
         const response = await axios.put(`http://localhost:8080/api/v1/products/${productId}`, this.productForm, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },
         });
-        alert('Update product successfully');
+        // alert('Update product successfully');
+        alert(response.data.message);
         this.closeModal();
         this.fetchProducts();
       } catch (error) {
@@ -373,18 +511,20 @@ export default {
     },
     async deleteProduct(productId) {
       confirm('Are you sure you want to delete this product?');
+      console.log(productId);
       try {
         const response = await axios.delete(`http://localhost:8080/api/v1/products/${productId}`, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },
         });
-        alert('Delete product successfully');
+        alert(response.data.message);
         this.fetchProducts();
       } catch (error) {
         console.error('Failed to delete product:', error);
       }
     },
+    
     changePage(newPage) {
       if (newPage >= 0 && newPage < this.totalPages) {
         this.currentPage = newPage;
@@ -394,6 +534,7 @@ export default {
     closeModal() {
       this.showAddProductModal = false;
       this.showEditProductModal = false;
+      this.showEditAttributeModal=false;
     },
     clearForm() {
       this.productForm = {
@@ -497,7 +638,17 @@ td {
   opacity: 0.7;
 }
 
-
+.modal-opacity {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .modal-content {
   border-radius: 8px;
 }
@@ -572,4 +723,25 @@ td {
   padding: 5px 10px;
   font-size: 12px;
 }
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  z-index: 1040; 
+}
+
+
+.modal.show {
+  z-index: 1050; /* Trên lớp nền mờ */
+}
+
+/* Tắt lớp nền khi modal không hiển thị */
+.modal-backdrop.hidden {
+  display: none;
+}
+
 </style>

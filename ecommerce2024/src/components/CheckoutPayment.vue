@@ -49,10 +49,10 @@
                         </div>
                         <div class="total mt-3">
                             <form @submit.prevent="validateDiscountCode">
-                                <label for="discount-code">Discount code</label><br />
+                                <!-- <label for="discount-code">Discount code</label><br />
                                 <input type="text" name="discount-code" id="discount-code" placeholder="Code"
                                     v-model="enteredCode" @blur="validateDiscountCode" />
-                                <div class="error-message text-danger">{{ errorMessage }}</div>
+                                <div class="error-message text-danger">{{ errorMessage }}</div> -->
                                 <div class="payment-options d-flex">
                                     <input class="me-1" type="radio" name="payment" id="cash" value="cash"
                                         v-model="paymentMethod" />
@@ -101,7 +101,7 @@
                             <input type="checkbox" v-model="isTotalConfirmed" required /> Confirm total
                         </div>
                         <div class="text-end" v-if="paymentMethod === 'vnpay'">
-                            <button type="submit" class="btn btn-primary mt-3">Order and Transfer</button>
+                            <button type="submit" class="btn btn-primary mt-3">Order by VNPay</button>
                         </div>
                         <div class="text-end" v-if="paymentMethod === 'cash'">
                             <button type="submit" class="btn btn-primary mt-3">Order</button>
@@ -208,6 +208,9 @@ export default {
             if (item.quantity > 1) {
                 item.quantity--;
                 this.updateSessionCart();
+            }
+            else {
+                alert("Quantity is less than 1 item");
             }
         },
         updateSessionCart() {

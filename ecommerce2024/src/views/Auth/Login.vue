@@ -35,10 +35,10 @@
                 </div>
               </div>
             </div>
-            <div class="mb-3 form-check">
+            <!-- <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="rememberMe" v-model="rememberMe" />
               <label class="form-check-label" for="rememberMe">Remember me</label>
-            </div>
+            </div> -->
             <button v-if="disableButton==false" type="submit" class="btn btn-primary w-100">Login</button>
             <button v-else type="submit" class="btn bg-danger w-100" disabled>Block Login</button>
           </form>

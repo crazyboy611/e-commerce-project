@@ -128,22 +128,20 @@ const router = createRouter({
   routes
 })
 
-// Navigation Guard
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!sessionStorage.getItem('accessToken'); // Check if the user is logged in
+  const isAuthenticated = !!sessionStorage.getItem('accessToken'); 
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // If the route requires authentication and the user is not authenticated
     if (!isAuthenticated) {
       next({
         path: '/Login',
-        query: { redirect: to.fullPath } // Redirect to the sign-up page with the target route
+        query: { redirect: to.fullPath } 
       });
     } else {
-      next(); // Allow access if authenticated
+      next(); 
     }
   } else {
-    next(); // Allow access if the route does not require authentication
+    next(); 
   }
 })
 
