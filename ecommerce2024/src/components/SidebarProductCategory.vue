@@ -5,48 +5,48 @@
     <!-- RAM Selection -->
     <div class="my-3">
       <div>
-        <div class="mt-5">
+        <!-- <div class="mt-5">
           <label for="" class="form-label">
             RAM: <span class="text-danger fs-5 ms-3">{{ selectedRam }} GB</span>
           </label>
           <input type="range" class="form-range" id="" v-model="selectedRam" min="1" max="1000"
             @input="toggleRam" />
-        </div>
-        <!-- <div class="dropdown mt-2">
+        </div> -->
+        <div class="dropdown mt-2">
           <a class="dropdown-toggle text-secondary" data-bs-toggle="collapse" :data-bs-target="'#ramCollapse'"
             aria-controls="ramCollapse" aria-expanded="false">
             RAM
           </a>
-        </div> -->
+        </div>
 
-        <!-- <div class="collapse mx-2" :id="'ramCollapse'">
+        <div class="collapse mx-2" :id="'ramCollapse'">
           <ul class="list-group list-group-flush mt-3">
             <li class="list-group-item d-flex">
-              <input type="radio" id="ram4" name="ram" v-model="selectedRam" value="1" @click="toggleRam('1')" />
-              <label class="ms-2" for="ram4">1GB</label>
+              <input type="radio" id="ram4" name="ram" v-model="selectedRam" value="1" @click="toggleRam('0-4')" />
+              <label class="ms-2" for="ram4">Nhỏ hơn 4GB</label>
             </li>
             <li class="list-group-item d-flex">
-              <input type="radio" id="ram6" name="ram" v-model="selectedRam" value="2" @click="toggleRam('2')" />
-              <label class="ms-2" for="ram6">2GB</label>
+              <input type="radio" id="ram6" name="ram" v-model="selectedRam" value="2" @click="toggleRam('4-8')" />
+              <label class="ms-2" for="ram6">Từ 4GB đến 8GB</label>
             </li>
             <li class="list-group-item d-flex">
-              <input type="radio" id="ram8" name="ram" v-model="selectedRam" value="3" @click="toggleRam('3')" />
-              <label class="ms-2" for="ram8">3GB</label>
+              <input type="radio" id="ram6" name="ram" v-model="selectedRam" value="3" @click="toggleRam('8-16')" />
+              <label class="ms-2" for="ram6">Từ 8GB đến 16GB</label>
             </li>
           </ul>
-        </div> -->
+        </div>
       </div>
     </div>
     <div class="my-3">
       <div>
-        <div class="mt-5">
+        <!-- <div class="mt-5">
           <label for="" class="form-label">
             Storage: <span class="text-danger fs-5 ms-3">{{ selectedStorage }} GB</span>
           </label>
           <input type="range" class="form-range" id="" v-model="selectedStorage" min="1" max="1000"
             @input="toggleStorage" />
-        </div>
-        <!-- <div class="dropdown mt-2">
+        </div> -->
+        <div class="dropdown mt-2">
           <a class="dropdown-toggle text-secondary" data-bs-toggle="collapse" :data-bs-target="'#storageCollapse'"
             aria-controls="storageCollapse" aria-expanded="false">
             Storage
@@ -55,22 +55,22 @@
         <div class="collapse mx-2" :id="'storageCollapse'">
           <ul class="list-group list-group-flush mt-3">
             <li class="list-group-item d-flex">
-              <input type="radio" id="storage64" name="storage" v-model="selectedStorage" value="33"
-                @click="toggleStorage('33')" />
-              <label class="ms-2" for="storage64">33GB</label>
+              <input type="radio" id="storage64" name="storage" v-model="selectedStorage" value="1"
+                @click="toggleStorage('0-256')" />
+              <label class="ms-2" for="storage64">Nhỏ hơn 256GB</label>
             </li>
             <li class="list-group-item d-flex">
-              <input type="radio" id="storage128" name="storage" v-model="selectedStorage" value="61"
-                @click="toggleStorage('61')" />
-              <label class="ms-2" for="storage128">61GB</label>
+              <input type="radio" id="storage128" name="storage" v-model="selectedStorage" value="2"
+                @click="toggleStorage('256-512')" />
+              <label class="ms-2" for="storage128">Từ 256GB đến 512GB</label>
             </li>
             <li class="list-group-item d-flex">
-              <input type="radio" id="storage256" name="storage" v-model="selectedStorage" value="248"
-                @click="toggleStorage('248')" />
-              <label class="ms-2" for="storage256">248GB</label>
+              <input type="radio" id="storage256" name="storage" v-model="selectedStorage" value="3"
+                @click="toggleStorage('512-1000')" />
+              <label class="ms-2" for="storage256">Từ 512GB đến 1TB</label>
             </li>
           </ul>
-        </div> -->
+        </div>
       </div>
     </div>
 
@@ -92,7 +92,7 @@ export default {
   },
   data() {
     return {
-      selectedRam: 0,
+      selectedRam: null,
       selectedStorage: 0,
       priceRange: 0,
     };
@@ -105,11 +105,11 @@ export default {
     updatePriceRange() {
       this.$emit('price-change', this.priceRange);
     },
-    toggleRam() {
-      this.$emit('updateRam', this.selectedRam);
+    toggleRam(value) {
+      this.$emit('updateRam', value);
     },
-    toggleStorage() {
-      this.$emit('updateStorage', this.selectedStorage);
+    toggleStorage(value) {
+      this.$emit('updateStorage', value);
     }
   }
 };

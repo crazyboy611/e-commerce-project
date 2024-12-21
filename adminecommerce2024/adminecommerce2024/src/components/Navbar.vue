@@ -49,7 +49,7 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                             <!-- <li><a class="dropdown-item" href="#"><i class="fa-solid fa-user me-1"></i>Profile</a></li> -->
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-gear me-1"></i>Settings</a></li>
+                            <!-- <li><a class="dropdown-item" href="#"><i class="fa-solid fa-gear me-1"></i>Settings</a></li> -->
                             <li><a class="dropdown-item" @click="logout"><i
                                         class="fa-solid fa-right-from-bracket me-1"></i>Logout</a></li>
                         </ul>
@@ -187,15 +187,15 @@ export default {
                         { name: "Manager Categories", link: "/ManagerCategories" }
                     ]
                 },
-                {
-                    name: "News",
-                    iconClass: "fa-solid fa-newspaper me-2",
-                    isDropdownOpen: false,
-                    subItems: [
-                        { name: "Manager News", link: "/ManagerNews" },
-                        { name: "Manager Comment in News", link: "/ManagerNewsComments" }
-                    ]
-                },
+                // {
+                //     name: "News",
+                //     iconClass: "fa-solid fa-newspaper me-2",
+                //     isDropdownOpen: false,
+                //     subItems: [
+                //         { name: "Manager News", link: "/ManagerNews" },
+                //         { name: "Manager Comment in News", link: "/ManagerNewsComments" }
+                //     ]
+                // },
                 {
                     name: "Shipment",
                     link: "/Shipment",

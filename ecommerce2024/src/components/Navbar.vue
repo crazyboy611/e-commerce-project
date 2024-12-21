@@ -31,9 +31,9 @@
                                                 <a class="nav-link" aria-current="page"><router-link
                                                         to="/">Home</router-link></a>
                                             </li>
-                                            <li class="nav-item">
+                                            <!-- <li class="nav-item">
                                                 <a class="nav-link"><router-link to="/newlist">News</router-link></a>
-                                            </li>
+                                            </li> -->
                                             <li class="nav-item">
                                                 <a class="nav-link"><router-link
                                                         to="/ProductList">Product</router-link></a>
@@ -103,6 +103,8 @@
     </div>
 </template>
 <script>
+import axios from 'axios';
+
 export default {
     name: 'Navbar',
     props: {
@@ -126,12 +128,20 @@ export default {
             this.username = sessionStorage.getItem('fullName');
         },
 
-        logout() {
-            sessionStorage.removeItem('accessToken');
-            sessionStorage.removeItem('fullName');
-            sessionStorage.clear();
-            this.isAuthenticated = false;
-            this.$router.push('/');
+        async logout() {
+            try {
+                const response = await axios.post(`http://localhost:8080/api/v1/users/logout`, {
+                    access_token: `${sessionStorage.getItem('accessToken')}`,
+                });
+                sessionStorage.removeItem('accessToken');
+                sessionStorage.removeItem('fullName');
+                sessionStorage.clear();
+                this.isAuthenticated = false;
+                this.$router.push('/');
+            }
+            catch(error){
+                alert("An error occurred error");
+            }
         },
         async checkToken() {
             if (sessionStorage.getItem('accessToken')) {
@@ -159,7 +169,7 @@ export default {
         startTokenCheckInterval() {
             this.tokenCheckInterval = setInterval(() => {
                 this.checkToken();
-            }, 10 * 60 * 1000); 
+            }, 10 * 60 * 1000);
         }
     },
     watch: {

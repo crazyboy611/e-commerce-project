@@ -66,7 +66,7 @@
       </div>
 
 
-      <div v-if="showAddProductModal" class="showAdd modal-opacity">
+      <div v-if="showAddProductModal" class="showAdd">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header d-flex justify-content-between">
@@ -122,11 +122,11 @@
                   <div v-for="(attr, index) in productForm.product_attributes" :key="index" class="mb-2">
                     <!-- <input type="text" v-model="attr.name" placeholder="Attribute Name" class="form-control mb-1"> -->
                     <select v-model="attr.name" class="form-select mb-1">
-                    <option value="" disabled>Select Attribute</option>
-                    <option v-for="attribute in attributeList" :key="attribute.attributeId" :value="attribute.name">
-                      {{ attribute.name }}
-                    </option>
-                  </select>
+                      <option value="" disabled>Select Attribute</option>
+                      <option v-for="attribute in attributeList" :key="attribute.attributeId" :value="attribute.name">
+                        {{ attribute.name }}
+                      </option>
+                    </select>
                     <input type="text" v-model="attr.value" placeholder="Attribute Value" class="form-control">
                   </div>
                   <button type="button" class="btn btn-primary btn-sm mt-2" @click="addAttribute">
@@ -223,11 +223,11 @@
                   <div v-for="(attr, index) in productForm.product_attributes" :key="index" class="mb-2">
                     <!-- <input type="text" v-model="attr.name" placeholder="Attribute Name" class="form-control mb-1"> -->
                     <select v-model="attr.name" class="form-select mb-1">
-                    <option value="" disabled>Select Attribute</option>
-                    <option v-for="attribute in attributeList" :key="attribute.id" :value="attribute.name">
-                      {{ attribute.name }}
-                    </option>
-                  </select>
+                      <option value="" disabled>Select Attribute</option>
+                      <option v-for="attribute in attributeList" :key="attribute.id" :value="attribute.name">
+                        {{ attribute.name }}
+                      </option>
+                    </select>
                     <input type="text" v-model="attr.value" placeholder="Attribute Value" class="form-control">
                   </div>
                   <button type="button" class="btn btn-primary btn-sm m-2" @click="editAttribute(productForm.id)">
@@ -313,25 +313,27 @@ export default {
         active: true,
         product_attributes: [
           {
-            name:'',
-            value:''
+            name: '',
+            value: ''
           }
         ],
         attributeList: [],
       },
+      newProductId: 0,
+      file: null,
       newProduct: {
         name: '',
         description: '',
         price: 0,
-        thumbnail: null,
+        thumbnail: '',
         subcategory: [],
         quantity: 0,
         is_hot: false,
         active: true,
         product_attributes: [
           {
-            name:'',
-            value:''
+            name: '',
+            value: ''
           }
         ],
       },
@@ -353,8 +355,8 @@ export default {
     },
   },
   mounted() {
-  this.getAttribute();
-},
+    this.getAttribute();
+  },
   methods: {
     currencyFormat(value) {
       if (!value) return "0 VNĐ";
@@ -368,7 +370,7 @@ export default {
     async fetchProducts() {
       const searchParam = this.searchQuery ? `&search=${this.searchQuery}` : '';
       try {
-        const response = await axios.get(`http://localhost:8080/api/v1/products/admin?&size=${this.pageSize}&page=${this.currentPage}${searchParam}&sort_by=id&sort_dir=asc`,{
+        const response = await axios.get(`http://localhost:8080/api/v1/products/admin?&size=${this.pageSize}&page=${this.currentPage}${searchParam}&sort_by=id&sort_dir=asc`, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },
@@ -379,7 +381,7 @@ export default {
         this.totalPages = response.data.data.total_pages;
         this.totalElements = response.data.data.total_elements;
       } catch (error) {
-        console.error('Failed to fetch products:', error);
+        alert(error.response.data.error);
       }
     },
     async fetchSubcategories() {
@@ -387,15 +389,7 @@ export default {
         const response = await axios.get('http://localhost:8080/api/v1/sub_categories');
         this.subcategories = response.data.data;
       } catch (error) {
-        console.error('Failed to fetch subcategories:', error);
-      }
-    },
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        this.productForm.thumbnail = file.name;
-        this.newProduct.thumbnail = file.name;
-        // console.log(this.productForm.thumbnail);
+        alert(error.response.data.error);
       }
     },
     async getAttribute() {
@@ -405,7 +399,7 @@ export default {
         const response = await axios.get(`http://localhost:8080/api/v1/attributes?size=${totalelement}&page=0`);
         this.attributeList = response.data.data.content; // Trích xuất content từ data
       } catch (error) {
-        console.error('Failed to fetch attributes:', error);
+        alert(error.response.data.error);
         this.attributeList = []; // Gán danh sách rỗng nếu xảy ra lỗi
       }
     },
@@ -427,7 +421,7 @@ export default {
         this.attributeForm = response.data.data.attributes;
         console.log(this.attributeForm)
       } catch (error) {
-        console.error('Error fetching product details:', error);
+        alert(error.response.data.error);
       }
     },
     async updateAttribute(productId) {
@@ -435,7 +429,7 @@ export default {
         console.log(this.productForm)
         this.productForm = {
           ...this.productForm,
-          product_attributes:this.attributeForm
+          product_attributes: this.attributeForm
         }
         console.log(this.productForm)
 
@@ -448,16 +442,18 @@ export default {
         this.closeModal();
         this.fetchProducts();
       } catch (error) {
-        console.error('Failed to edit product:', error);
+        alert(error.response.data.error);
       }
     },
     addProduct() {
       this.closeModal();
       this.showAddProductModal = true;
-      this.clearForm();
+    },
+    handleFileUpload(event) {
+      this.file = event.target.files[0];
     },
     async handleAddProduct() {
-      this.newProduct.product_attributes=this.productForm.product_attributes
+      this.newProduct.product_attributes = this.productForm.product_attributes
       try {
         const response = await axios.post(`http://localhost:8080/api/v1/products`, this.newProduct, {
           headers: {
@@ -465,7 +461,33 @@ export default {
           },
         });
         alert(response.data.message);
+        this.newProductId = response.data.data.id;
+        console.log(this.newProductId);
+        if (this.file) {
+          console.log(this.file);
+          try {
+            const formData = new FormData();
+            formData.append('files', this.file);
+            const response1 = await axios.post(`http://localhost:8080/api/v1/products/uploads/${this.newProductId}`, formData, {
+              headers: {
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                'Content-Type': 'multipart/form-data'
+              }
+            });
+            this.newProduct.thumbnail = response1.data.data[0].image_url;
+            console.log(response1);
+            console.log(this.newProduct.thumbnail);
+            const response2 = await axios.put(`http://localhost:8080/api/v1/products/${this.newProductId}`, this.newProduct, {
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+              },
+            });
+          } catch (error) {
+            alert('An error occurred while uploading the profile image.');
+          }
+        }
         this.fetchProducts();
+        this.showAddProductModal = false;
       }
       catch (error) {
         alert(error.response.data.error);
@@ -484,7 +506,7 @@ export default {
           // product_attributes:product.attributes
         };
       } catch (error) {
-        console.error('Failed to edit product:', error);
+        alert(error.response.data.error);
       }
     },
     async handleUpdateProduct(productId) {
@@ -493,20 +515,42 @@ export default {
 
         this.productForm = {
           ...this.productForm,
-          is_hot:this.productForm.hot
+          is_hot: this.productForm.hot
         }
         console.log(this.productForm)
+        // const response = await axios.put(`http://localhost:8080/api/v1/products/${productId}`, this.productForm, {
+        //   headers: {
+        //     Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+        //   },
+        // });
+        if (this.file) {
+          console.log(this.file);
+          try {
+            const formData = new FormData();
+            formData.append('files', this.file);
+            const response1 = await axios.post(`http://localhost:8080/api/v1/products/uploads/${productId}`, formData, {
+              headers: {
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                'Content-Type': 'multipart/form-data'
+              }
+            });
+            this.productForm.thumbnail = response1.data.data[0].image_url;
+            console.log(response1);
+          } catch (error) {
+            alert('An error occurred while uploading the profile image.');
+          }
+        }
         const response = await axios.put(`http://localhost:8080/api/v1/products/${productId}`, this.productForm, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           },
         });
-        // alert('Update product successfully');
         alert(response.data.message);
         this.closeModal();
         this.fetchProducts();
+        this.clearForm();
       } catch (error) {
-        console.error('Failed to update product:', error);
+        alert(error.response.data.error);
       }
     },
     async deleteProduct(productId) {
@@ -521,10 +565,11 @@ export default {
         alert(response.data.message);
         this.fetchProducts();
       } catch (error) {
-        console.error('Failed to delete product:', error);
+        alert(error.response.data.error);
+        // alert(error);
       }
     },
-    
+
     changePage(newPage) {
       if (newPage >= 0 && newPage < this.totalPages) {
         this.currentPage = newPage;
@@ -534,7 +579,7 @@ export default {
     closeModal() {
       this.showAddProductModal = false;
       this.showEditProductModal = false;
-      this.showEditAttributeModal=false;
+      this.showEditAttributeModal = false;
     },
     clearForm() {
       this.productForm = {
@@ -649,6 +694,7 @@ td {
   justify-content: center;
   align-items: center;
 }
+
 .modal-content {
   border-radius: 8px;
 }
@@ -730,18 +776,18 @@ td {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); 
-  z-index: 1040; 
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
 }
 
 
 .modal.show {
-  z-index: 1050; /* Trên lớp nền mờ */
+  z-index: 1050;
+  /* Trên lớp nền mờ */
 }
 
 /* Tắt lớp nền khi modal không hiển thị */
 .modal-backdrop.hidden {
   display: none;
 }
-
 </style>

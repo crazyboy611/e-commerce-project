@@ -109,17 +109,17 @@ export default {
 
             const ramParam = this.selectedRam
                 ? sectionId === '1'
-                    ? `&mobile_ram=0-${this.selectedRam}`
+                    ? `&mobile_ram=${this.selectedRam}`
                     : sectionId === '2'
-                        ? `&laptop_ram=0-${this.selectedRam}`
+                        ? `&laptop_ram=${this.selectedRam}`
                         : ''
                 : '';
 
             const storageParam = this.selectedStorage
                 ? sectionId === '1'
-                    ? `&mobile_storage=0-${this.selectedStorage}`
+                    ? `&mobile_storage=${this.selectedStorage}`
                     : sectionId === '2'
-                        ? `&laptop_storage=0-${this.selectedStorage}`
+                        ? `&laptop_storage=${this.selectedStorage}`
                         : ''
                 : '';
 

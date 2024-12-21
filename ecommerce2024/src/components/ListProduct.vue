@@ -24,27 +24,36 @@
     </div>
 
     <div class="row my-5">
-      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3" v-for="(product, index) in products" :key="product.id">
-        <router-link :to="{ name: 'DetailProduct', params: { product: product.id } }">
-          <div class="card h-100 d-flex flex-column">
-            <div class="card-body d-flex flex-column">
-              <router-link class="text-end"
-                :to="{ name: 'ShoppingCartView', params: { product: JSON.stringify(product) } }"> <i
-                  class="fa-solid fa-cart-shopping text-end fs-5"></i></router-link>
-              <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
-                class="img-fluid card-img-top p-5" :alt="product.name">
-              <h5 class="card-title mb-2 text-center">{{ product.name }}</h5>
-              <p class="text-center fw-bold fs-5"><span class="text-danger">{{ currencyFormat(product.price) }}</span>
-              </p>
-              <div class="my-2 mt-auto text-center">
-                <router-link :to="{ name: 'DetailProduct', params: { product: product.id } }">
-                  <button>Show Detail</button>
+      <template v-if="products && products.length > 0">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3" v-for="(product, index) in products" :key="product.id">
+          <router-link :to="{ name: 'DetailProduct', params: { product: product.id } }">
+            <div class="card h-100 d-flex flex-column">
+              <div class="card-body d-flex flex-column">
+                <router-link class="text-end"
+                  :to="{ name: 'ShoppingCartView', params: { product: JSON.stringify(product) } }">
+                  <i class="fa-solid fa-cart-shopping text-end fs-5"></i>
                 </router-link>
+                <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
+                  class="img-fluid card-img-top p-5" :alt="product.name">
+                <h5 class="card-title mb-2 text-center">{{ product.name }}</h5>
+                <p class="text-center fw-bold fs-5">
+                  <span class="text-danger">{{ currencyFormat(product.price) }}</span>
+                </p>
+                <div class="my-2 mt-auto text-center">
+                  <router-link :to="{ name: 'DetailProduct', params: { product: product.id } }">
+                    <button>Show Detail</button>
+                  </router-link>
+                </div>
               </div>
             </div>
-          </div>
-        </router-link>
-      </div>
+          </router-link>
+        </div>
+      </template>
+      <template v-else>
+        <div class="text-center w-100">
+          <p class="fs-4 text-muted">Not found product</p>
+        </div>
+      </template>
     </div>
 
     <nav>

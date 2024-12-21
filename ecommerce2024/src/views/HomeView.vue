@@ -5,9 +5,9 @@
                 <b class="text-secondary fs-2">New Product</b>
                 <h1 class="text-white fw-lighter">Iphone 14 <span class="fw-bold">Pro Max</span></h1>
                 <p class="text-secondary fs-4 mb-5">Create to change everything for the better. For everyone.</p>
-                <a href="/">
+                <!-- <a href="/">
                     <button class="fw-medium fs-5">Buy</button>
-                </a>
+                </a> -->
             </div>
             <div class="image">
                 <img src="../ImageProduct/IphoneImage.png" alt="">
@@ -44,9 +44,9 @@
                     <h2 class="fw-lighter">Macbook <span class="fw-bold">Air</span></h2>
                     <p>The new 15‑inch MacBook Air makes room for more of what you love with a spacious Liquid
                         Retina display.</p>
-                    <a href="/">
+                    <!-- <a href="/">
                         <button class="fw-medium fs-5">Buy</button>
-                    </a>
+                    </a> -->
                 </div>
                 <div class="image">
                     <img src="../ImagePR/MacBookPro.png" alt="">
@@ -152,30 +152,34 @@
 
     <section class="section-6 my-5" id="home-view-discount">
         <div class="container">
-            <h3>Discount up to <span class="text-danger">50%</span></h3>
+            <h3><span class="text-danger">Hot Products</span></h3>
             <div class="row my-5">
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3" v-for="(product, index) in discountProducts"
                     :key="index">
-                    <div class="card h-100 d-flex flex-column">
-                        <div class="card-body d-flex flex-column">
-                            <router-link class="text-end"
-                                :to="{ name: 'ShoppingCartView', params: { product: JSON.stringify(product) } }"> <i
-                                    class="fa-solid fa-cart-shopping text-end fs-5"></i></router-link>
-                            <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
-                                class="img-fluid card-img-top p-5" :alt="product.name">
-                            <h3 class="card-title mb-2 text-center">{{ product.name }}</h3>
-                            <p class="card-text text-center">{{ product.description }}</p>
-                            <p class="card-text text-center text-muted">{{ product.category_name }}</p>
-                            <p class="card-text text-center"><strong>{{ currencyFormat(product.price) }}</strong></p>
-                            <div class="my-2 mt-3 text-center">
-                                <!-- Pass product data via route params -->
-                                <router-link :to="{ name: 'Checkout', params: { product: JSON.stringify(product) } }">
-                                    <button class="btn btn-dark px-5 my-1"
-                                        @click="purchaseProduct(product)">Purchase</button>
-                                </router-link>
+                    <RouterLink :to="{ name: 'DetailProduct', params: { product: product.id } }" style="text-decoration: none;">
+                        <div class="card h-100 d-flex flex-column">
+                            <div class="card-body d-flex flex-column">
+                                <router-link class="text-end"
+                                    :to="{ name: 'ShoppingCartView', params: { product: JSON.stringify(product) } }"> <i
+                                        class="fa-solid fa-cart-shopping text-end fs-5"></i></router-link>
+                                <img :src="`http://localhost:8080/api/v1/products/images/${product.thumbnail}`"
+                                    class="img-fluid card-img-top p-5" :alt="product.name">
+                                <h3 class="card-title mb-2 text-center">{{ product.name }}</h3>
+                                <p class="card-text text-center">{{ product.description }}</p>
+                                <p class="card-text text-center text-muted">{{ product.category_name }}</p>
+                                <p class="card-text text-center"><strong>{{ currencyFormat(product.price) }}</strong>
+                                </p>
+                                <div class="my-2 mt-3 text-center">
+                                    <!-- Pass product data via route params -->
+                                    <router-link
+                                        :to="{ name: 'Checkout', params: { product: JSON.stringify(product) } }">
+                                        <button class="btn btn-dark px-5 my-1"
+                                            @click="purchaseProduct(product)">Purchase</button>
+                                    </router-link>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </RouterLink>
                 </div>
             </div>
         </div>
@@ -186,7 +190,7 @@
     <section class="section-7">
         <img src="../ImagePR/Banner2.png" width="100%" height="50%" alt="">
         <div class="content">
-            <RouterLink to="/ProductList"> 
+            <RouterLink to="/ProductList">
                 <button class="my-2 mt-3 text-center">Shop now</button>
             </RouterLink>
         </div>
@@ -721,10 +725,12 @@ a {
     flex-direction: column;
     justify-content: space-between;
 }
-.section-6 a{
+
+.section-6 a {
     cursor: pointer;
     color: rgb(228, 64, 64);
 }
+
 .section-6 .card .card-title,
 .section-6 .card .card-text {
     flex-grow: 1;
